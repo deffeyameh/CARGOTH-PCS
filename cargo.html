@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCS CARGO | Backoffice</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #dc3545;
+  --primary-dark: #a71d2a;
+  --primary-light: #f8d7da;
+  --accent: #ff6b35;
+  --dark: #1a1a2e;
+  --dark2: #16213e;
+  --sidebar-w: 80px;
+  --yellow: #ffc107;
+  --green: #198754;
+  --blue: #0d6efd;
+}
+* { box-sizing: border-box; }
+body { font-size: 0.82rem; background: #f0f2f5; margin: 0; font-family: 'IBM Plex Sans Thai', sans-serif; }
+
+/* ── Layout ── */
+.app-wrap { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar-w); min-height: 100vh; background: var(--dark);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0; flex-shrink: 0;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  border-right: 1px solid rgba(220,53,69,.3);
+  z-index: 100;
+}
+.sidebar-brand {
+  width: 100%; background: var(--primary); padding: .6rem .3rem;
+  text-align: center; color: #fff; font-weight: 900;
+  font-size: .65rem; letter-spacing: 1px; line-height: 1.2;
+  border-bottom: 2px solid var(--primary-dark);
+}
+.sidebar-brand .brand-big { font-size: 1rem; display: block; letter-spacing: 2px; }
+.nav-item {
+  width: 100%; padding: .6rem .2rem; cursor: pointer; transition: all .18s;
+  display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  text-decoration: none; color: #8a9bb0;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+.nav-item:hover { background: rgba(220,53,69,.12); color: #fff; border-left-color: var(--primary); }
+.nav-item.active { background: rgba(220,53,69,.2); color: var(--primary) !important; border-left-color: var(--primary); }
+.nav-item i { font-size: 1.25rem; }
+.nav-item span { font-size: .58rem; font-weight: 700; text-align: center; line-height: 1.1; }
+.content { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+
+/* ── Topbar ── */
+.page-topbar { background: #fff; border-bottom: 2px solid var(--primary); padding: .4rem .8rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.topbar-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .4rem; }
+.filter-group { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
+
+/* ── Tables ── */
+.table thead { background: var(--primary); color: #fff; position: sticky; top: 0; z-index: 5; }
+.table thead th { font-weight: 700; font-size: .75rem; white-space: nowrap; }
+.table-hover tbody tr:hover { background: #fff5f5; }
+.table { font-size: .76rem; }
+.table th, .table td { vertical-align: middle; }
+.product_detail { width: 42px !important; min-width: 42px !important; text-align: center; }
+tr.group-start td { border-top: 2px solid #dee2e6; }
+.total-row td { background: #fff3f3; font-size: .72rem; }
+.badge-circle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border: 2px solid var(--primary); border-radius: 50%;
+  font-size: .62rem; font-weight: 700; color: var(--primary);
+}
+.truncate-text { cursor: pointer; color: var(--blue); font-size: .72rem; font-family: 'JetBrains Mono', monospace; }
+
+/* ── Stats bar ── */
+.stats-bar { padding: .35rem .8rem; background: #fff; border-bottom: 1px solid #dee2e6; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .4rem; }
+.stat-pill { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 20px; padding: .15rem .7rem; font-size: .72rem; font-weight: 700; display: inline-flex; align-items: center; gap: .3rem; }
+.stat-pill.red { border-color: var(--primary); color: var(--primary); background: #fff5f5; }
+.stat-pill.blue { border-color: var(--blue); color: var(--blue); background: #f0f4ff; }
+.stat-pill.green { border-color: var(--green); color: var(--green); background: #f0fff4; }
+.stat-pill.orange { border-color: #fd7e14; color: #fd7e14; background: #fff8f0; }
+
+/* ── Pages ── */
+.page { display: none; flex: 1; flex-direction: column; overflow: hidden; min-width: 0; }
+.page.active { display: flex; }
+
+/* ── Home ── */
+.home-hero {
+  min-height: 55vh; background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 50%, #0f3460 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1rem; position: relative; overflow: hidden;
+}
+.home-hero::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(220,53,69,.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 50%, rgba(13,110,253,.1) 0%, transparent 60%);
+}
+.hero-badge { background: var(--primary); color: #fff; font-size: .7rem; font-weight: 700; padding: .2rem .8rem; border-radius: 20px; letter-spacing: 2px; z-index: 1; }
+.hero-title { font-size: 2.8rem; font-weight: 900; color: #fff; letter-spacing: 3px; z-index: 1; line-height: 1; }
+.hero-title span { color: var(--primary); }
+.hero-sub { font-size: 1rem; color: rgba(255,255,255,.6); z-index: 1; }
+.hero-stats { display: flex; gap: 2.5rem; z-index: 1; margin-top: .5rem; }
+.hero-stat { text-align: center; color: #fff; }
+.hero-stat .num { font-size: 2rem; font-weight: 900; color: var(--yellow); font-family: 'JetBrains Mono', monospace; }
+.hero-stat .lbl { font-size: .72rem; opacity: .6; }
+.home-cards { padding: 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 1rem; background: #f8f9fa; }
+.home-card { background: #fff; border-radius: 12px; padding: 1.2rem 1rem; box-shadow: 0 2px 12px rgba(0,0,0,.06); text-align: center; cursor: pointer; transition: all .2s; border: 2px solid transparent; }
+.home-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(220,53,69,.15); border-color: var(--primary); }
+.home-card i { font-size: 2rem; margin-bottom: .5rem; }
+.home-card h6 { font-weight: 700; margin: 0; font-size: .82rem; }
+.home-card small { color: #888; font-size: .68rem; }
+
+/* ── Tracking page ── */
+.tracking-wrap { padding: 2rem 1rem; max-width: 680px; margin: 0 auto; }
+.track-result { margin-top: 1.5rem; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+.track-header { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: #fff; padding: 1rem 1.5rem; }
+.track-step { display: flex; gap: 1rem; padding: .7rem 1.5rem; border-bottom: 1px solid #f5f5f5; align-items: flex-start; }
+.track-step:last-child { border: none; }
+.step-dot { width: 12px; height: 12px; border-radius: 50%; background: #dee2e6; flex-shrink: 0; margin-top: 3px; }
+.step-dot.done { background: var(--green); }
+.step-dot.current { background: var(--yellow); box-shadow: 0 0 0 3px rgba(255,193,7,.3); }
+
+/* ── Bag / Note card ── */
+.bag-card { background: #fff; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,.05); border-left: 4px solid var(--primary); }
+
+/* ── Status badges ── */
+.status-badge { font-size: .68rem; padding: .18rem .5rem; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+.status-pending { background: #fff3cd; color: #856404; }
+.status-transit { background: #cce5ff; color: #004085; }
+.status-arrived { background: #d4edda; color: #155724; }
+.status-delivered { background: #d1ecf1; color: #0c5460; }
+
+/* ── Modal ── */
+.modal-header.bg-primary-pcs { background: var(--primary) !important; }
+.form-label { font-weight: 600; font-size: .77rem; margin-bottom: .2rem; }
+.form-control-sm, .form-select-sm { font-size: .78rem; }
+
+/* ── Image slots ── */
+.img-slot {
+  position: relative; width: 150px; height: 150px;
+  border: 2px dashed #ccc; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: #f8f9fa; cursor: pointer; flex-shrink: 0;
+  transition: border-color .2s;
+}
+.img-slot:hover { border-color: var(--primary); }
+.img-slot.has-img { border-color: var(--green); border-style: solid; }
+.img-slot input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
+.img-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+.img-slot-del { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); border: none; color: #fff; font-size: .7rem; z-index: 3; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* ── Status photo cards ── */
+.sph-card { border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; }
+.sph-header { font-size: .72rem; font-weight: 700; padding: .4rem; text-align: center; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+.sph-body { height: 140px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; position: relative; overflow: hidden; cursor: pointer; }
+.sph-body img { width: 100%; height: 100%; object-fit: cover; }
+.sph-body input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.sph-footer { font-size: .68rem; padding: .3rem; text-align: center; background: #fff; color: #888; }
+
+/* ── History ── */
+.history-item { background: #f8f9fa; border-radius: 6px; padding: .5rem .8rem; border-left: 3px solid #dee2e6; font-size: .75rem; }
+.history-item.create { border-left-color: var(--green); }
+.history-item.update { border-left-color: var(--yellow); }
+.history-item.delete { border-left-color: var(--primary); }
+
+/* ── Product row ── */
+.pr-row td { padding: .2rem .3rem !important; }
+
+/* ── Action col ── */
+.action-col { display: flex; flex-direction: column; gap: .25rem; align-items: center; }
+
+/* ── Pagination ── */
+.pagination { font-size: .72rem; margin: 0; flex-wrap: wrap; }
+.pagination .page-link { padding: .2rem .45rem; }
+
+/* ── Transport badge colors ── */
+.badge-ek { background: #ffc107; color: #000; }
+.badge-sea { background: #0d6efd; color: #fff; }
+.badge-air { background: #0dcaf0; color: #000; }
+
+/* ── Print ── */
+@media print {
+  .sidebar, .page-topbar, .stats-bar, .no-print { display: none !important; }
+  .content { width: 100% !important; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 999px) {
+  .app-wrap { flex-direction: column; }
+  .sidebar { width: 100%; min-height: auto; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; position: relative; padding: .3rem; }
+  .sidebar-brand { display: none; }
+  .nav-item { width: auto; flex-direction: row; gap: .4rem; padding: .4rem .6rem; border-left: none; border-bottom: 3px solid transparent; }
+  .nav-item.active { border-left: none; border-bottom-color: var(--primary); }
+  .nav-item i { font-size: .9rem; }
+  .hero-title { font-size: 1.8rem; }
+  .hero-stats { gap: 1rem; }
+}
+@media (max-width: 600px) {
+  .hidden-mob { display: none !important; }
+  .hero-title { font-size: 1.4rem; }
+  .img-slot { width: 120px; height: 120px; }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #f0f2f5; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ── Lightbox ── */
+.lb-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 9999; display: none; align-items: center; justify-content: center; }
+.lb-overlay.show { display: flex; }
+.lb-img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.lb-close { position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,.15); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<div class="sidebar" id="mainSidebar">
+  <div class="sidebar-brand">
+    <span class="brand-big">PCS</span>
+    CARGO
+  </div>
+  <a class="nav-item active" data-page="home" onclick="nav('home',this)">
+    <i class="bi bi-house-door-fill"></i><span>Home</span>
+  </a>
+  <a class="nav-item" data-page="allstatus" onclick="nav('allstatus',this)">
+    <i class="bi bi-search"></i><span>All Status</span>
+  </a>
+  <a class="nav-item" data-page="receive" onclick="nav('receive',this)">
+    <i class="bi bi-dropbox"></i><span>Receive</span>
+  </a>
+  <a class="nav-item" data-page="transport" onclick="nav('transport',this)">
+    <i class="bi bi-truck-front-fill"></i><span>Transport</span>
+  </a>
+  <a class="nav-item" data-page="arrival" onclick="nav('arrival',this)">
+    <i class="bi bi-box2-fill"></i><span>Arrival</span>
+  </a>
+  <a class="nav-item" data-page="notetracking" onclick="nav('notetracking',this)">
+    <i class="bi bi-journal-text"></i><span>Note</span>
+  </a>
+  <a class="nav-item" data-page="bag" onclick="nav('bag',this)">
+    <i class="bi bi-collection-fill"></i><span>Bag</span>
+  </a>
+  <a class="nav-item" data-page="tracking" onclick="nav('tracking',this)">
+    <i class="bi bi-geo-alt-fill"></i><span>Track</span>
+  </a>
+</div>
+
+<!-- ══════════ CONTENT ══════════ -->
+<div class="content">
+
+<!-- ════════════ PAGE: HOME ════════════ -->
+<div class="page active" id="page-home">
+  <div class="home-hero">
+    <div class="hero-badge">PCS CARGO LOGISTICS</div>
+    <div class="hero-title">PCS <span>CARGO</span></div>
+    <div class="hero-sub">Backoffice Management System | ระบบจัดการโลจิสติกส์</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num" id="h-total">-</div><div class="lbl">Total Records</div></div>
+      <div class="hero-stat"><div class="num" id="h-kg">-</div><div class="lbl">Total KG</div></div>
+      <div class="hero-stat"><div class="num" id="h-cbm">-</div><div class="lbl">Total CBM</div></div>
+    </div>
+  </div>
+  <div class="home-cards">
+    <div class="home-card" onclick="nav('allstatus',null)">
+      <i class="bi bi-search text-primary"></i><h6>All Status</h6><small>ทั้งหมด</small>
+    </div>
+    <div class="home-card" onclick="nav('receive',null)">
+      <i class="bi bi-dropbox text-success"></i><h6>Receive</h6><small>รับสินค้า</small>
+    </div>
+    <div class="home-card" onclick="nav('transport',null)">
+      <i class="bi bi-truck-front" style="color:#ffc107"></i><h6>Transport</h6><small>ขนส่ง</small>
+    </div>
+    <div class="home-card" onclick="nav('arrival',null)">
+      <i class="bi bi-box2 text-info"></i><h6>Arrival</h6><small>ถึงไทย</small>
+    </div>
+    <div class="home-card" onclick="nav('notetracking',null)">
+      <i class="bi bi-journal-text text-secondary"></i><h6>Note Tracking</h6><small>บันทึก</small>
+    </div>
+    <div class="home-card" onclick="nav('bag',null)">
+      <i class="bi bi-collection text-danger"></i><h6>Bag</h6><small>กระสอบ</small>
+    </div>
+    <div class="home-card" onclick="nav('tracking',null)">
+      <i class="bi bi-geo-alt" style="color:#6f42c1"></i><h6>Tracking</h6><small>ตรวจสอบ</small>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: ALL STATUS ════════════ -->
+<div class="page" id="page-allstatus">
+  <div class="page-topbar" id="topbar-allstatus">
+    <div class="topbar-inner">
+      <div class="filter-group">
+        <select id="as-branch" class="form-select form-select-sm hidden-mob" style="min-width:120px">
+          <option value="">All Branches</option>
+          <option>TTP</option><option>CARGO CENTER</option><option>JMF</option><option>ALI</option><option>MOMO</option>
+        </select>
+        <select id="as-limit" class="form-select form-select-sm hidden-mob" style="width:68px">
+          <option value="25">25</option><option value="50" selected>50</option>
+          <option value="100">100</option><option value="all">All</option>
+        </select>
+        <select id="as-transport" class="form-select form-select-sm hidden-mob" style="width:90px">
+          <option value="">All Trans</option><option value="EK">EK</option><option value="SEA">SEA</option><option value="AIR">AIR</option>
+        </select>
+        <input id="as-search" class="form-control form-control-sm" type="search" placeholder="Search SM / Tracking" style="max-width:175px">
+        <label class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 hidden-mob" style="font-size:.72rem">
+          <input type="checkbox" id="as-notprinted" class="form-check-input m-0"> <span>尚未打印</span>
+        </label>
+        <button class="btn btn-sm btn-danger" onclick="asApply()"><i class="bi bi-search"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="asReset()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="d-flex align-items-center gap-1">
+        <button class="btn btn-success btn-sm" onclick="showCreateModal()">
+          <i class="bi bi-plus-circle"></i> <span class="hidden-mob">創建數據</span>
+        </button>
+        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#exportModal">
+          <i class="bi bi-file-earmark-arrow-up"></i> <span class="hidden-mob">Export</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="stats-bar no-print">
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="stat-pill" id="as-stat-count"><i class="bi bi-layers"></i> 0 records</span>
+      <span class="stat-pill red" id="as-stat-kg"><i class="bi bi-box-seam"></i> 0 KG</span>
+      <span class="stat-pill blue" id="as-stat-cbm"><i class="bi bi-box"></i> 0 CBM</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <input type="checkbox" id="as-all-top" style="transform:scale(1.3)" onchange="asToggleAll(this.checked)">
+      <label for="as-all-top" class="mb-0 small fw-bold">Select All</label>
+      <button class="btn btn-outline-danger btn-sm" onclick="asPrintMulti()"><i class="bi bi-printer"></i> Print</button>
+      <span class="text-muted small" id="as-sel-count">0 selected</span>
+    </div>
+  </div>
+  <div class="table-responsive flex-fill" style="overflow-y:auto">
+    <table class="table table-bordered table-hover mb-0" id="as-table">
+      <thead>
+        <tr>
+          <th style="width:55px">#</th>
+          <th style="width:28px"><input type="checkbox" id="as-all-chk" style="transform:scale(1.3)" onchange="asToggleAll(this.checked)"></th>
+          <th style="min-width:165px">SM Code</th>
+          <th style="width:80px">Ctn Code</th>
+          <th style="width:55px">Trans</th>
+          <th style="width:85px">SM Date</th>
+          <th style="width:80px">Branch</th>
+          <th style="min-width:90px">Product</th>
+          <th class="product_detail">Dum</th>
+          <th style="min-width:100px;font-size:.68rem">Type</th>
+          <th style="min-width:85px;font-size:.68rem">Bag</th>
+          <th style="min-width:110px">Tracking</th>
+          <th class="product_detail">W</th>
+          <th class="product_detail">L</th>
+          <th class="product_detail">H</th>
+          <th class="product_detail">Qty</th>
+          <th class="product_detail">Wt</th>
+          <th class="product_detail">CBM</th>
+          <th style="width:75px">Action</th>
+          <th style="width:36px"><i class="bi bi-printer"></i></th>
+        </tr>
+      </thead>
+      <tbody id="as-tbody"></tbody>
+    </table>
+  </div>
+  <div class="px-2 py-1 bg-white border-top no-print d-flex align-items-center justify-content-between" id="as-pagination-wrap">
+    <div id="as-pagination"></div>
+    <small class="text-muted" id="as-page-info"></small>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: RECEIVE ════════════ -->
+<div class="page" id="page-receive">
+  <div class="page-topbar">
+    <div class="topbar-inner">
+      <div class="filter-group">
+        <select id="rc-branch" class="form-select form-select-sm hidden-mob" style="min-width:120px">
+          <option value="">All Branches</option>
+          <option>TTP</option><option>CARGO CENTER</option><option>JMF</option><option>ALI</option>
+        </select>
+        <input id="rc-search" class="form-control form-control-sm" type="search" placeholder="Search SM / Tracking" style="max-width:175px">
+        <button class="btn btn-sm btn-danger" onclick="rcApply()"><i class="bi bi-search"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="rcReset()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="showCreateModal()"><i class="bi bi-plus-circle"></i> รับสินค้าใหม่</button>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="stat-pill" id="rc-stat-count">0 records</span>
+      <span class="stat-pill green" id="rc-stat-pending">0 Pending</span>
+    </div>
+  </div>
+  <div class="table-responsive flex-fill" style="overflow-y:auto">
+    <table class="table table-bordered table-hover mb-0">
+      <thead><tr>
+        <th>#</th><th>SM Code</th><th>Branch</th><th>Product</th>
+        <th>Tracking</th><th>Qty</th><th>Wt(kg)</th><th>CBM</th>
+        <th>Date</th><th>Status</th><th>Action</th>
+      </tr></thead>
+      <tbody id="rc-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: TRANSPORT ════════════ -->
+<div class="page" id="page-transport">
+  <div class="page-topbar">
+    <div class="topbar-inner">
+      <div class="filter-group">
+        <select id="tr-type" class="form-select form-select-sm" style="width:90px">
+          <option value="">All Trans</option><option value="EK">EK</option><option value="SEA">SEA</option><option value="AIR">AIR</option>
+        </select>
+        <input id="tr-search" class="form-control form-control-sm" type="search" placeholder="Search container..." style="max-width:175px">
+        <button class="btn btn-sm btn-danger" onclick="trApply()"><i class="bi bi-search"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="trReset()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <button class="btn btn-warning btn-sm fw-bold" onclick="showContainerModal()"><i class="bi bi-box-seam"></i> สร้างตู้ใหม่</button>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="stat-pill" id="tr-stat-count">0 Containers</span>
+      <span class="stat-pill" style="border-color:#ffc107;color:#856404" id="tr-stat-ek">0 EK</span>
+      <span class="stat-pill blue" id="tr-stat-sea">0 SEA</span>
+      <span class="stat-pill" style="border-color:#0dcaf0;color:#0c5460" id="tr-stat-air">0 AIR</span>
+    </div>
+  </div>
+  <div class="table-responsive flex-fill" style="overflow-y:auto">
+    <table class="table table-bordered table-hover mb-0">
+      <thead><tr>
+        <th>#</th><th>Container Code</th><th>Transport</th><th>Branch</th>
+        <th>Depart</th><th>ETA</th><th>Items</th><th>Total KG</th><th>Total CBM</th>
+        <th>Status</th><th>Action</th>
+      </tr></thead>
+      <tbody id="tr-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: ARRIVAL ════════════ -->
+<div class="page" id="page-arrival">
+  <div class="page-topbar">
+    <div class="topbar-inner">
+      <div class="filter-group">
+        <input id="ar-search" class="form-control form-control-sm" type="search" placeholder="Search..." style="max-width:200px">
+        <button class="btn btn-sm btn-danger" onclick="arApply()"><i class="bi bi-search"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="arReset()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <button class="btn btn-info btn-sm fw-bold text-dark" onclick="showArrivalModal()"><i class="bi bi-box-arrow-in-down"></i> บันทึกการมาถึง</button>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="stat-pill" id="ar-stat-count">0 records</span>
+      <span class="stat-pill green" id="ar-stat-arr">0 Arrived</span>
+      <span class="stat-pill blue" id="ar-stat-del">0 Delivered</span>
+    </div>
+  </div>
+  <div class="table-responsive flex-fill" style="overflow-y:auto">
+    <table class="table table-bordered table-hover mb-0">
+      <thead><tr>
+        <th>#</th><th>SM Code</th><th>Branch</th><th>Product</th>
+        <th>Tracking</th><th>Wt(kg)</th><th>CBM</th>
+        <th>Arrival Date</th><th>Status</th><th>Customer</th><th>Action</th>
+      </tr></thead>
+      <tbody id="ar-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: NOTE TRACKING ════════════ -->
+<div class="page" id="page-notetracking">
+  <div class="page-topbar">
+    <div class="topbar-inner">
+      <div class="filter-group">
+        <input id="nt-search" class="form-control form-control-sm" type="search" placeholder="Search tracking / note..." style="max-width:220px">
+        <button class="btn btn-sm btn-danger" onclick="ntApply()"><i class="bi bi-search"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="ntReset()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <button class="btn btn-outline-danger btn-sm" onclick="showNoteModal()"><i class="bi bi-plus-circle"></i> เพิ่มบันทึก</button>
+    </div>
+  </div>
+  <div class="stats-bar"><span class="stat-pill" id="nt-stat-count">0 notes</span></div>
+  <div class="flex-fill p-3" style="overflow-y:auto">
+    <div id="nt-cards" class="d-flex flex-column gap-2"></div>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: BAG ════════════ -->
+<div class="page" id="page-bag">
+  <div class="page-topbar">
+    <div class="topbar-inner">
+      <div class="filter-group">
+        <select id="bg-branch" class="form-select form-select-sm" style="min-width:120px">
+          <option value="">All Branches</option>
+          <option>TTP</option><option>CARGO CENTER</option><option>JMF</option>
+        </select>
+        <select id="bg-type" class="form-select form-select-sm" style="width:130px">
+          <option value="">All Types</option>
+          <option>กระสอบทั่วไป</option><option>กระสอบเฉพาะ</option>
+        </select>
+        <input id="bg-search" class="form-control form-control-sm" type="search" placeholder="Search bag..." style="max-width:155px">
+        <button class="btn btn-sm btn-danger" onclick="bgApply()"><i class="bi bi-search"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="bgReset()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="showBagModal()"><i class="bi bi-plus-circle"></i> สร้างกระสอบ</button>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <span class="stat-pill" id="bg-stat-count">0 bags</span>
+    <span class="stat-pill red" id="bg-stat-items">0 items</span>
+  </div>
+  <div class="table-responsive flex-fill" style="overflow-y:auto">
+    <table class="table table-bordered table-hover mb-0">
+      <thead><tr>
+        <th>#</th><th>Bag Name</th><th>Branch</th><th>Type</th>
+        <th>Date</th><th>Items</th><th>Total Wt</th><th>Status</th><th>Action</th>
+      </tr></thead>
+      <tbody id="bg-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════ PAGE: TRACKING ════════════ -->
+<div class="page" id="page-tracking">
+  <div style="background:linear-gradient(135deg,var(--primary),var(--primary-dark)); padding:1.5rem; text-align:center; color:#fff;">
+    <h4 class="fw-bold mb-0"><i class="bi bi-geo-alt-fill"></i> ตรวจสอบสถานะสินค้า</h4>
+    <small class="opacity-75">Track Your Shipment — PCS CARGO</small>
+  </div>
+  <div class="tracking-wrap">
+    <div class="bg-white rounded-3 p-4 shadow-sm">
+      <h6 class="fw-bold mb-3"><i class="bi bi-search text-danger"></i> ค้นหาด้วยเลขพัสดุ / SM Code</h6>
+      <div class="input-group mb-2">
+        <input type="text" id="tk-input" class="form-control" placeholder="กรอกเลขพัสดุ / Tracking Number...">
+        <button class="btn btn-danger" onclick="doTrack()"><i class="bi bi-search"></i> ค้นหา</button>
+      </div>
+      <small class="text-muted">เช่น: SMA20569871-TTP24062 หรือ 0008790</small>
+    </div>
+    <div id="tk-result" class="mt-3"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /app-wrap -->
+
+<!-- ══════════════ LIGHTBOX ══════════════ -->
+<div class="lb-overlay" id="lightbox" onclick="this.classList.remove('show')">
+  <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('show')"><i class="bi bi-x-lg"></i></button>
+  <img class="lb-img" id="lb-img" src="" alt="">
+</div>
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary-pcs text-white py-2">
+        <h6 class="modal-title" id="detailModalTitle"></h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0" id="detailModalBody"></div>
+      <div class="modal-footer py-1">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-danger btn-sm" onclick="printDetailModal()"><i class="bi bi-printer"></i> Print</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h6 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up text-danger"></i> Export Data</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="row m-0">
+          <div class="col-4 p-0">
+            <button class="btn btn-danger rounded-0 w-100 py-5 d-flex flex-column align-items-center gap-2" onclick="doExport('land')">
+              <i class="bi bi-truck fs-2"></i><span class="small text-center">陆运导出<br><small>EK รถ</small></span>
+            </button>
+          </div>
+          <div class="col-4 p-0">
+            <button class="btn btn-primary rounded-0 w-100 py-5 d-flex flex-column align-items-center gap-2" onclick="doExport('sea')">
+              <i class="bi bi-water fs-2"></i><span class="small text-center">海运导出<br><small>SEA เรือ</small></span>
+            </button>
+          </div>
+          <div class="col-4 p-0">
+            <button class="btn btn-info rounded-0 w-100 py-5 d-flex flex-column align-items-center gap-2" onclick="doExport('air')">
+              <i class="bi bi-airplane fs-2"></i><span class="small text-center">空运导出<br><small>AIR เครื่องบิน</small></span>
+            </button>
+          </div>
+        </div>
+        <div class="p-2 border-top">
+          <button class="btn btn-outline-secondary w-100 btn-sm" onclick="doExport('all')"><i class="bi bi-file-earmark-spreadsheet"></i> Export All (Shipping)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CREATE / EDIT MODAL ════ -->
+<div class="modal fade" id="createModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header py-2" id="cr-modal-header" style="background:var(--green)">
+        <div>
+          <h6 class="modal-title fw-bold mb-0 text-white" id="cr-modal-title"><i class="bi bi-plus-circle"></i> 創建數據</h6>
+          <small class="text-white opacity-75" id="cr-modal-subtitle"></small>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-sm btn-light d-none" id="cr-print-btn" onclick="crPrintSticker()"><i class="bi bi-printer"></i> Print Sticker</button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+      </div>
+      <div class="modal-body p-0">
+        <!-- Tabs -->
+        <ul class="nav nav-pills px-3 pt-2 pb-1 bg-light border-bottom gap-1 flex-wrap" id="cr-tabs">
+          <li class="nav-item"><a class="nav-link active py-1 px-3 small fw-bold" data-bs-toggle="pill" href="#cr-tab-info">📋 Information</a></li>
+          <li class="nav-item"><a class="nav-link py-1 px-3 small fw-bold" data-bs-toggle="pill" href="#cr-tab-images">🖼 Images</a></li>
+          <li class="nav-item"><a class="nav-link py-1 px-3 small fw-bold" data-bs-toggle="pill" href="#cr-tab-status">📸 Status Photos</a></li>
+          <li class="nav-item"><a class="nav-link py-1 px-3 small fw-bold" data-bs-toggle="pill" href="#cr-tab-history">🕐 History</a></li>
+        </ul>
+        <div class="tab-content">
+
+          <!-- TAB: Information -->
+          <div class="tab-pane fade show active p-3" id="cr-tab-info">
+            <div class="row g-2 mb-2">
+              <div class="col-md-2 col-sm-4">
+                <label class="form-label">SM Code <span class="text-danger">*</span><br><small class="text-muted fw-normal">SM号</small></label>
+                <input type="text" class="form-control form-control-sm" id="cr-smcode" placeholder="SMA00000000">
+              </div>
+              <div class="col-md-1 col-sm-4">
+                <label class="form-label">Number<br><small class="text-muted fw-normal">号码</small></label>
+                <input type="number" class="form-control form-control-sm" id="cr-number" value="1" min="0.1" step="0.1">
+              </div>
+              <div class="col-md-2 col-sm-4">
+                <label class="form-label">Branch <span class="text-danger">*</span><br><small class="text-muted fw-normal">公司</small></label>
+                <select class="form-select form-select-sm" id="cr-branch">
+                  <option>TTP</option><option>CARGO CENTER</option><option>JMF</option><option>ALI</option><option>MOMO</option>
+                </select>
+              </div>
+              <div class="col-md-2 col-sm-4">
+                <label class="form-label">
+                  Customer Code
+                  <button type="button" class="btn btn-warning btn-sm py-0 px-1" style="font-size:.6rem" onclick="$('#cr-custcode').val('NOCODE')">NOCODE</button>
+                  <br><small class="text-muted fw-normal">客户代码</small>
+                </label>
+                <input type="text" class="form-control form-control-sm" id="cr-custcode" placeholder="TTP0000" oninput="this.value=this.value.toUpperCase()">
+              </div>
+              <div class="col-md-2 col-sm-4">
+                <label class="form-label">Order No<br><small class="text-muted fw-normal">客户订单号</small></label>
+                <input type="text" class="form-control form-control-sm" id="cr-orderno" placeholder="Optional">
+              </div>
+              <div class="col-md-1 col-sm-4">
+                <label class="form-label">Warehouse<br><small class="text-muted fw-normal">仓库</small></label>
+                <select class="form-select form-select-sm" id="cr-warehouse">
+                  <option value="GZ">GZ</option><option value="YW">YW</option><option value="SH">SH</option>
+                </select>
+              </div>
+              <div class="col-md-1 col-sm-4">
+                <label class="form-label">Transport <span class="text-danger">*</span><br><small class="text-muted fw-normal">运输类型</small></label>
+                <select class="form-select form-select-sm" id="cr-transport">
+                  <option value="EK">รถ (EK)</option>
+                  <option value="SEA">เรือ (SEA)</option>
+                  <option value="AIR">✈ AIR</option>
+                </select>
+              </div>
+              <div class="col-md-1 col-sm-4">
+                <label class="form-label">Co Date<br><small class="text-muted fw-normal">记录日期</small></label>
+                <input type="date" class="form-control form-control-sm" id="cr-date">
+              </div>
+            </div>
+            <hr class="my-2">
+            <div class="row g-2 mb-2">
+              <div class="col-md-5">
+                <label class="form-label">Note 备注</label>
+                <textarea class="form-control form-control-sm" id="cr-note" rows="2" placeholder="备注..."></textarea>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Amount 金额</label>
+                <input type="number" class="form-control form-control-sm" id="cr-amount" step="0.01">
+              </div>
+              <div class="col-md-1">
+                <label class="form-label">件数</label>
+                <input type="text" class="form-control form-control-sm bg-light" id="cr-total-qty" readonly>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">公斤 Total KG</label>
+                <input type="text" class="form-control form-control-sm bg-light" id="cr-total-kg" readonly>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">立方 Total CBM</label>
+                <input type="text" class="form-control form-control-sm bg-light" id="cr-total-cbm" readonly>
+              </div>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-md-3">
+                <label class="form-label">Container Code (Optional)</label>
+                <input type="text" class="form-control form-control-sm" id="cr-container" placeholder="CTN-SEA-001">
+              </div>
+            </div>
+            <hr class="my-2">
+            <!-- Products table -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong class="small">รายการสินค้า / Products 产品列表</strong>
+              <button class="btn btn-sm btn-outline-success" onclick="addProductRow()"><i class="bi bi-plus"></i> Add Row</button>
+            </div>
+            <div class="table-responsive" style="max-height:300px;overflow-y:auto">
+              <table class="table table-bordered table-sm mb-0" id="cr-product-table">
+                <thead class="table-danger sticky-top">
+                  <tr>
+                    <th style="width:28px">#</th>
+                    <th style="min-width:115px">Type 类型</th>
+                    <th style="min-width:140px">Name 名称</th>
+                    <th style="width:55px">pcs 件数</th>
+                    <th style="min-width:130px">Tracking 运单号</th>
+                    <th style="width:60px">Wt/pc</th>
+                    <th style="width:48px">W</th>
+                    <th style="width:48px">L</th>
+                    <th style="width:48px">H</th>
+                    <th style="width:58px">Qty 数量</th>
+                    <th style="width:85px">Wt×Total</th>
+                    <th style="width:78px">CBM/pc</th>
+                    <th style="width:78px">CBM×Tot</th>
+                    <th style="width:32px"><i class="bi bi-trash3"></i></th>
+                  </tr>
+                </thead>
+                <tbody id="product-rows"></tbody>
+              </table>
+            </div>
+            <div class="d-flex justify-content-end gap-3 mt-2 pe-1">
+              <small class="text-muted">件数: <strong id="cr-foot-qty" class="text-dark">0</strong></small>
+              <small class="text-muted">公斤: <strong id="cr-foot-kg" class="text-danger">0</strong></small>
+              <small class="text-muted">立方: <strong id="cr-foot-cbm" class="text-primary">0</strong></small>
+            </div>
+          </div>
+
+          <!-- TAB: Images -->
+          <div class="tab-pane fade p-3" id="cr-tab-images">
+            <h6 class="fw-bold mb-3"><i class="bi bi-images text-danger"></i> รูปภาพสินค้า / Product Images 产品图片</h6>
+            <div class="d-flex flex-wrap gap-3" id="cr-image-slots"></div>
+          </div>
+
+          <!-- TAB: Status Photos -->
+          <div class="tab-pane fade p-3" id="cr-tab-status">
+            <h6 class="fw-bold mb-3"><i class="bi bi-camera text-danger"></i> รูปภาพสถานะ / Status Photos</h6>
+            <div class="row g-3">
+              <div class="col-6 col-md-3">
+                <div class="sph-card">
+                  <div class="sph-header" style="background:#fff3cd">📦 ถ่ายภาพเข้าโกดังจีน<br><small class="text-muted">到中国仓库</small></div>
+                  <div class="sph-body" id="sph-cn">
+                    <span class="text-muted small">No Image</span>
+                    <input type="file" accept="image/*" onchange="sphPreview(this,'sph-cn','sph-cn-date')">
+                  </div>
+                  <div class="sph-footer" id="sph-cn-date">Date: N/A</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="sph-card">
+                  <div class="sph-header" style="background:#cce5ff">🚢 ปิดตู้เดินทางมาไทย<br><small class="text-muted">关箱发货</small></div>
+                  <div class="sph-body" id="sph-ship">
+                    <span class="text-muted small">No Image</span>
+                    <input type="file" accept="image/*" onchange="sphPreview(this,'sph-ship','sph-ship-date')">
+                  </div>
+                  <div class="sph-footer" id="sph-ship-date">Date: N/A</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="sph-card">
+                  <div class="sph-header" style="background:#d4edda">🇹🇭 รับสินค้าเข้าโกดังไทย<br><small class="text-muted">收货入泰国仓</small></div>
+                  <div class="sph-body" id="sph-th">
+                    <span class="text-muted small">No Image</span>
+                    <input type="file" accept="image/*" onchange="sphPreview(this,'sph-th','sph-th-date')">
+                  </div>
+                  <div class="sph-footer" id="sph-th-date">Date: N/A</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="sph-card">
+                  <div class="sph-header" style="background:#d1ecf1">🚚 จัดส่งภายในประเทศ<br><small class="text-muted">国内派送</small></div>
+                  <div class="sph-body" id="sph-del">
+                    <span class="text-muted small">No Image</span>
+                    <input type="file" accept="image/*" onchange="sphPreview(this,'sph-del','sph-del-date')">
+                  </div>
+                  <div class="sph-footer" id="sph-del-date">Date: N/A</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: History -->
+          <div class="tab-pane fade p-3" id="cr-tab-history">
+            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history text-danger"></i> ประวัติการแก้ไข / History Logs</h6>
+            <div id="cr-history-list" class="d-flex flex-column gap-2"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer py-1 bg-light">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel 返回</button>
+        <button class="btn btn-success btn-sm fw-bold" onclick="saveCreate()"><i class="bi bi-floppy2-fill"></i> Save 保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Note Modal -->
+<div class="modal fade" id="noteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary-pcs text-white py-2">
+        <h6 class="modal-title fw-bold">เพิ่มบันทึก Note Tracking</h6>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2"><label class="form-label">Tracking Number</label>
+          <input type="text" class="form-control form-control-sm" id="nt-input-tracking" placeholder="เลขพัสดุ"></div>
+        <div class="mb-2"><label class="form-label">SM Code (Optional)</label>
+          <input type="text" class="form-control form-control-sm" id="nt-input-sm" placeholder="SMA..."></div>
+        <div class="mb-2"><label class="form-label">Status</label>
+          <select class="form-select form-select-sm" id="nt-input-status">
+            <option>รับของแล้ว</option><option>กำลังขนส่ง</option><option>ถึงไทยแล้ว</option><option>ส่งให้ลูกค้าแล้ว</option>
+          </select></div>
+        <div class="mb-2"><label class="form-label">Note / หมายเหตุ</label>
+          <textarea class="form-control form-control-sm" id="nt-input-note" rows="3" placeholder="บันทึกเพิ่มเติม..."></textarea></div>
+      </div>
+      <div class="modal-footer py-1">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="saveNote()"><i class="bi bi-save"></i> บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bag Modal -->
+<div class="modal fade" id="bagModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary-pcs text-white py-2">
+        <h6 class="modal-title fw-bold">สร้างกระสอบใหม่</h6>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2"><label class="form-label">Branch</label>
+          <select class="form-select form-select-sm" id="bg-input-branch"><option>TTP</option><option>CARGO CENTER</option><option>JMF</option></select></div>
+        <div class="mb-2"><label class="form-label">Bag Type</label>
+          <select class="form-select form-select-sm" id="bg-input-type"><option>กระสอบทั่วไป</option><option>กระสอบเฉพาะ</option></select></div>
+        <div class="mb-2"><label class="form-label">Date</label>
+          <input type="date" class="form-control form-control-sm" id="bg-input-date"></div>
+        <div class="mb-2"><label class="form-label">Note</label>
+          <input type="text" class="form-control form-control-sm" id="bg-input-note" placeholder="หมายเหตุ"></div>
+      </div>
+      <div class="modal-footer py-1">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="saveBag()"><i class="bi bi-save"></i> สร้าง</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Container Modal -->
+<div class="modal fade" id="containerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:var(--yellow)">
+        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-box-seam"></i> สร้างตู้ขนส่งใหม่</h6>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-12">
+            <label class="form-label">Container Code <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm" id="ctn-code" placeholder="CTN-SEA-001">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Transport Type</label>
+            <select class="form-select form-select-sm" id="ctn-type">
+              <option value="EK">EK (รถ)</option><option value="SEA">SEA (เรือ)</option><option value="AIR">AIR (✈ เครื่องบิน)</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Branch</label>
+            <select class="form-select form-select-sm" id="ctn-branch">
+              <option>TTP</option><option>CARGO CENTER</option><option>JMF</option><option>ALI</option><option>MOMO</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Depart Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control form-control-sm" id="ctn-depart">
+          </div>
+          <div class="col-6">
+            <label class="form-label">ETA</label>
+            <input type="date" class="form-control form-control-sm" id="ctn-eta">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer py-1">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-warning btn-sm fw-bold" onclick="saveContainer()"><i class="bi bi-save"></i> สร้างตู้</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Arrival Modal -->
+<div class="modal fade" id="arrivalModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info py-2">
+        <h6 class="modal-title fw-bold text-dark"><i class="bi bi-box-arrow-in-down"></i> บันทึกการมาถึง</h6>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-12"><label class="form-label">SM Code <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm" id="arr-smcode" placeholder="SMA...">
+            <small class="text-muted">กรอก SM Code บางส่วน</small></div>
+          <div class="col-12"><label class="form-label">ชื่อลูกค้า</label>
+            <input type="text" class="form-control form-control-sm" id="arr-customer" placeholder="คุณสมชาย"></div>
+          <div class="col-6"><label class="form-label">Arrival Date</label>
+            <input type="date" class="form-control form-control-sm" id="arr-date"></div>
+          <div class="col-6"><label class="form-label">Status</label>
+            <select class="form-select form-select-sm" id="arr-status">
+              <option value="arrived">Arrived</option>
+              <option value="delivered">Delivered</option>
+            </select></div>
+        </div>
+      </div>
+      <div class="modal-footer py-1">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-info btn-sm fw-bold text-dark" onclick="saveArrival()"><i class="bi bi-save"></i> บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print Sticker Modal -->
+<div class="modal fade" id="stickerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary-pcs text-white py-2">
+        <h6 class="modal-title fw-bold"><i class="bi bi-printer"></i> Print Sticker — PCS CARGO</h6>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="sticker-body"></div>
+      <div class="modal-footer py-1">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-danger btn-sm fw-bold" onclick="window.print()"><i class="bi bi-printer-fill"></i> Print</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+  <div id="mainToast" class="toast align-items-center text-white border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body fw-bold" id="toast-msg">Saved!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+// ══════════════════════════════════
+// RAW DATA
+// ══════════════════════════════════
+let RAW_DATA = [
+  {"id":180383,"branch_id":1,"transport_id":2,"sm_code":"SMA20569871-TTP24062","number":"0.1","sm_date":"2026-03-25","printed":"true","products":[{"product_name":"包装盒","dummy_qty":null,"product_tracking":"0008790","product_qty":"120","product_width":"45","product_length":"45","product_height":"31","product_weight_per_item":"9","product_cbm_per_item":"0.0628","bag_name":[],"product_type":"普通货物/ทั่วไป/G"}],"transport_name":"SEA","branch_name":"TTP","box_weight":"1080.0000","box_cbm":"7.533000","container_code":null,"created_by":"113","images":[],"history_logs":[{"action":"UPDATE","target":"container","target_id":180383,"date":"2026-03-25 16:04:05","by":"ttp","detail":"แก้ไข container #180383"},{"action":"CREATE","target":"container","target_id":180383,"date":"2026-03-25 14:00:00","by":"ttp","detail":"สร้าง container #180383"}]},
+  {"id":180342,"branch_id":4,"transport_id":1,"sm_code":"SMA20565287-PCS126","number":"0.1","sm_date":"2026-03-25","printed":"true","products":[{"product_name":"面膜","dummy_qty":"50","product_tracking":"0008803","product_qty":"9","product_width":"50","product_length":"36","product_height":"38","product_weight_per_item":"17","product_cbm_per_item":"0.0684","bag_name":[],"product_type":"名牌/ลิขสิทธิ์/B"},{"product_name":"面膜","dummy_qty":"50","product_tracking":"0008803-2","product_qty":"95","product_width":"48","product_length":"41","product_height":"30","product_weight_per_item":"21","product_cbm_per_item":"0.0590","bag_name":[],"product_type":"名牌/ลิขสิทธิ์/B"}],"transport_name":"EK","branch_name":"CARGO CENTER","box_weight":"2148.0000","box_cbm":"6.224400","container_code":null,"created_by":"113","images":[],"history_logs":[{"action":"CREATE","target":"container","target_id":180342,"date":"2026-03-25 10:00:00","by":"pcs","detail":"สร้าง container #180342"}]},
+  {"id":180239,"branch_id":1,"transport_id":2,"sm_code":"SMA20553857-TTP64784K","number":"0.1","sm_date":"2026-03-25","printed":"false","products":[{"product_name":"鸟笼","dummy_qty":null,"product_tracking":"6170257-2","product_qty":"3","product_width":"60","product_length":"33","product_height":"51","product_weight_per_item":"11.5","product_cbm_per_item":"0.1010","bag_name":[],"product_type":"普通货物/ทั่วไป/G"},{"product_name":"鸟笼","dummy_qty":null,"product_tracking":"6170257-3","product_qty":"2","product_width":"38","product_length":"62","product_height":"58","product_weight_per_item":"13","product_cbm_per_item":"0.1366","bag_name":[],"product_type":"普通货物/ทั่วไป/G"}],"transport_name":"SEA","branch_name":"TTP","box_weight":"60.5000","box_cbm":"0.5762","container_code":null,"created_by":"61","images":[],"history_logs":[{"action":"CREATE","target":"container","target_id":180239,"date":"2026-03-25 09:00:00","by":"ttp","detail":"สร้าง container #180239"}]},
+  {"id":180101,"branch_id":1,"transport_id":1,"sm_code":"SMA20538893-TTP5509","number":"0.1","sm_date":"2026-03-24","printed":"false","products":[{"product_name":"毛蛋","dummy_qty":null,"product_tracking":"0008495-2","product_qty":"200","product_width":"43","product_length":"32","product_height":"28","product_weight_per_item":"7","product_cbm_per_item":"0.0385","bag_name":[],"product_type":"药和食物/อย./F"}],"transport_name":"EK","branch_name":"TTP","box_weight":"1400.0000","box_cbm":"7.7056","container_code":null,"created_by":"61","images":[],"history_logs":[{"action":"UPDATE","target":"container","target_id":180101,"date":"2026-03-24 16:32:03","by":"ttp","detail":"แก้ไข container #180101"},{"action":"CREATE","target":"product","target_id":227694,"date":"2026-03-24 15:39:33","by":"LIN SHUPEI","detail":"สร้าง product #227694"},{"action":"CREATE","target":"container","target_id":180101,"date":"2026-03-24 15:39:33","by":"ttp","detail":"สร้าง container #180101"}]},
+  {"id":179950,"branch_id":1,"transport_id":2,"sm_code":"SMA20522679-TTP7630","number":"0.1","sm_date":"2026-03-24","printed":"true","products":[{"product_name":"薯片","dummy_qty":null,"product_tracking":"8160548449110","product_qty":"1","product_width":"58","product_length":"22","product_height":"39","product_weight_per_item":"2","product_cbm_per_item":"0.0498","bag_name":[],"product_type":"药和食物/อย./F"},{"product_name":"薯片","dummy_qty":null,"product_tracking":"8160554425210","product_qty":"1","product_width":"58","product_length":"22","product_height":"39","product_weight_per_item":"2","product_cbm_per_item":"0.0498","bag_name":[],"product_type":"药和食物/อย./F"},{"product_name":"薯片","dummy_qty":null,"product_tracking":"8160551461310","product_qty":"1","product_width":"58","product_length":"22","product_height":"39","product_weight_per_item":"2","product_cbm_per_item":"0.0498","bag_name":[],"product_type":"药和食物/อย./F"}],"transport_name":"SEA","branch_name":"TTP","box_weight":"106.0000","box_cbm":"2.6374","container_code":null,"created_by":"113","images":[],"history_logs":[{"action":"CREATE","target":"container","target_id":179950,"date":"2026-03-24 09:00:00","by":"pcs","detail":"สร้าง container #179950"}]},
+  {"id":179948,"branch_id":1,"transport_id":1,"sm_code":"SMA20521759-TTP60448","number":"0.1","sm_date":"2026-03-24","printed":"true","products":[{"product_name":"毛蛋","dummy_qty":"10","product_tracking":"0008711","product_qty":"100","product_width":"43","product_length":"32","product_height":"28","product_weight_per_item":"7","product_cbm_per_item":"0.0385","bag_name":[],"product_type":"药和食物/อย./F"}],"transport_name":"EK","branch_name":"TTP","box_weight":"700.0000","box_cbm":"3.8528","container_code":null,"created_by":"113","images":[],"history_logs":[]},
+  {"id":180385,"branch_id":4,"transport_id":2,"sm_code":"SMA20570084-PCS9820","number":"1","sm_date":"2026-03-25","printed":"true","products":[{"product_name":"五金配件","dummy_qty":null,"product_tracking":"STL130007725167","product_qty":"1","product_width":"30","product_length":"18","product_height":"11","product_weight_per_item":"9.5","product_cbm_per_item":"0.0059","bag_name":[],"product_type":"普通货物/ทั่วไป/G"}],"transport_name":"SEA","branch_name":"CARGO CENTER","box_weight":"9.5000","box_cbm":"0.005940","container_code":null,"created_by":"113","images":[],"history_logs":[]},
+  {"id":180384,"branch_id":4,"transport_id":2,"sm_code":"SMA20569930-PCS9151","number":"1","sm_date":"2026-03-25","printed":"true","products":[{"product_name":"太阳能板","dummy_qty":null,"product_tracking":"0008800","product_qty":"3","product_width":"81","product_length":"56","product_height":"57","product_weight_per_item":"27","product_cbm_per_item":"0.2586","bag_name":[],"product_type":"电器/มอก./T"}],"transport_name":"SEA","branch_name":"CARGO CENTER","box_weight":"81.0000","box_cbm":"0.7756","container_code":null,"created_by":"113","images":[],"history_logs":[]},
+  {"id":180018,"branch_id":1,"transport_id":1,"sm_code":"SMA20528091-TTP40378R","number":"1","sm_date":"2026-03-24","printed":"true","products":[{"product_name":"空压机","dummy_qty":"1","product_tracking":"S66451365570","product_qty":"12","product_width":"81","product_length":"49","product_height":"128","product_weight_per_item":"86","product_cbm_per_item":"0.5080","bag_name":[],"product_type":"电器/มอก./T"}],"transport_name":"EK","branch_name":"TTP","box_weight":"1032.0000","box_cbm":"6.0963","container_code":null,"created_by":"113","images":[],"history_logs":[]},
+  {"id":180054,"branch_id":4,"transport_id":1,"sm_code":"SMA20533913-PCS9444","number":"3","sm_date":"2026-03-24","printed":"true","products":[{"product_name":"桌板","dummy_qty":"1","product_tracking":"888067585041","product_qty":"2","product_width":"210","product_length":"124","product_height":"10","product_weight_per_item":"25","product_cbm_per_item":"0.2604","bag_name":[],"product_type":"普通货物/ทั่วไป/G"}],"transport_name":"EK","branch_name":"CARGO CENTER","box_weight":"50.0000","box_cbm":"0.5208","container_code":null,"created_by":"113","images":[],"history_logs":[]},
+  {"id":144809,"branch_id":12,"transport_id":1,"sm_code":"SMA16683877-ALI/TDT-1839","number":"2","sm_date":"2025-11-24","printed":"true","products":[{"product_name":"割草机","dummy_qty":"1","product_tracking":"ZY202438581926-2","product_qty":"19","product_width":"100","product_length":"102","product_height":"73","product_weight_per_item":"182","product_cbm_per_item":"0.7446","bag_name":[],"product_type":"电器/มอก./T"}],"transport_name":"EK","branch_name":"ALI","box_weight":"3458.0000","box_cbm":"14.1474","container_code":null,"created_by":"108","images":[],"history_logs":[]},
+  {"id":9043,"branch_id":1,"transport_id":3,"sm_code":"SMA940312-TTP18186","number":"1","sm_date":"2025-02-15","printed":"true","products":[{"product_name":"玩具/厨房玩具套装","dummy_qty":null,"product_tracking":"DPK301659188637","product_qty":"1","product_width":"49","product_length":"48","product_height":"48","product_weight_per_item":"9.5","product_cbm_per_item":"0.1129","bag_name":[],"product_type":"电器/มอก./T"}],"transport_name":"AIR","branch_name":"TTP","box_weight":"9.5000","box_cbm":"0.1128","container_code":null,"created_by":"60","images":[],"history_logs":[]},
+  {"id":228,"branch_id":1,"transport_id":1,"sm_code":"SMA063228-TTP64671K","number":"3","sm_date":"2024-09-25","printed":"true","products":[{"product_name":"眼镜","dummy_qty":"5","product_tracking":"78837566955523","product_qty":"1","product_width":"12","product_length":"19","product_height":"10","product_weight_per_item":"0.14","product_cbm_per_item":"0.0023","bag_name":["2024-09-26-3-กระสอบทั่วไปTTP"],"product_type":"普通货物/ทั่วไป/G"},{"product_name":"反弹器","dummy_qty":"10","product_tracking":"300037111806","product_qty":"1","product_width":"34","product_length":"37","product_height":"30","product_weight_per_item":"16","product_cbm_per_item":"0.0377","bag_name":["2024-09-26-3-กระสอบทั่วไปTTP"],"product_type":"普通货物/ทั่วไป/G"}],"transport_name":"EK","branch_name":"TTP","box_weight":"16.1400","box_cbm":"0.0400","container_code":null,"created_by":"9","images":[],"history_logs":[]}
+];
+
+let RECEIVE_DATA = RAW_DATA.map((c,i) => ({
+  id:c.id, sm_code:c.sm_code, branch:c.branch_name,
+  product:c.products[0].product_name, tracking:c.products[0].product_tracking,
+  qty:c.products.reduce((s,p)=>s+parseInt(p.product_qty||0),0),
+  weight:parseFloat(c.box_weight), cbm:parseFloat(c.box_cbm),
+  receive_date:c.sm_date, status:['pending','transit','arrived','delivered'][i%4]
+}));
+
+let TRANSPORT_DATA = [
+  {id:'CTN-2026-001',code:'CTN-SEA-001',type:'SEA',branch:'TTP',depart:'2026-03-20',eta:'2026-04-10',items:45,kg:12500,cbm:85.4,status:'transit'},
+  {id:'CTN-2026-002',code:'CTN-EK-002',type:'EK',branch:'CARGO CENTER',depart:'2026-03-22',eta:'2026-03-30',items:23,kg:8320,cbm:42.1,status:'arrived'},
+  {id:'CTN-2026-003',code:'CTN-SEA-003',type:'SEA',branch:'JMF',depart:'2026-03-15',eta:'2026-04-05',items:67,kg:22100,cbm:112.7,status:'delivered'},
+  {id:'CTN-2026-004',code:'CTN-EK-004',type:'EK',branch:'TTP',depart:'2026-03-25',eta:'2026-04-02',items:15,kg:4200,cbm:28.3,status:'pending'},
+  {id:'CTN-2026-005',code:'CTN-AIR-001',type:'AIR',branch:'CARGO CENTER',depart:'2026-03-26',eta:'2026-03-28',items:8,kg:420,cbm:3.2,status:'transit'},
+  {id:'CTN-2026-006',code:'CTN-AIR-002',type:'AIR',branch:'TTP',depart:'2026-03-24',eta:'2026-03-26',items:5,kg:185,cbm:1.8,status:'arrived'},
+];
+
+let ARRIVAL_DATA = RAW_DATA.slice(0,10).map((c,i) => ({
+  id:c.id, sm_code:c.sm_code, branch:c.branch_name,
+  product:c.products.map(p=>p.product_name).join(', '),
+  tracking:c.products[0].product_tracking,
+  weight:parseFloat(c.box_weight), cbm:parseFloat(c.box_cbm),
+  arrival_date:c.sm_date,
+  status:['arrived','delivered','arrived','delivered'][i%4],
+  customer:['คุณสมชาย','คุณสมหญิง','คุณวิชัย','คุณอำพล','คุณมาลี','บ.สยามเทค'][i%6]
+}));
+
+let NOTE_DATA = [
+  {id:1,tracking:'0008790',sm:'SMA20569871-TTP24062',status:'ถึงไทยแล้ว',note:'สินค้ามาถึงโกดัง TTP แล้ว รอลูกค้ามารับ',date:'2026-03-25',created_by:'Admin'},
+  {id:2,tracking:'0008803',sm:'SMA20565287-PCS126',status:'กำลังขนส่ง',note:'สินค้าออกจากจีนแล้ว คาดว่าถึงไทยสัปดาห์หน้า',date:'2026-03-24',created_by:'Admin'},
+  {id:3,tracking:'6170257-2',sm:'SMA20553857-TTP64784K',status:'รับของแล้ว',note:'รับสินค้าที่โกดังจีนเรียบร้อย',date:'2026-03-23',created_by:'Staff01'},
+  {id:4,tracking:'S66451365570',sm:'SMA20528091-TTP40378R',status:'ส่งให้ลูกค้าแล้ว',note:'ส่งสินค้าให้ลูกค้าเรียบร้อย มีลายเซ็นต์รับ',date:'2026-03-22',created_by:'Staff02'},
+];
+
+let BAG_DATA = [
+  {id:1,name:'2026-03-25-1-กระสอบทั่วไปTTP',branch:'TTP',type:'กระสอบทั่วไป',date:'2026-03-25',items:12,weight:540.5,status:'open'},
+  {id:2,name:'2026-03-25-2-กระสอบเฉพาะCARGO',branch:'CARGO CENTER',type:'กระสอบเฉพาะ',date:'2026-03-25',items:8,weight:320.0,status:'closed'},
+  {id:3,name:'2026-03-24-1-กระสอบทั่วไปTTP',branch:'TTP',type:'กระสอบทั่วไป',date:'2026-03-24',items:25,weight:890.0,status:'shipped'},
+  {id:4,name:'2026-03-24-2-กระสอบทั่วไปJMF',branch:'JMF',type:'กระสอบทั่วไป',date:'2026-03-24',items:6,weight:178.5,status:'open'},
+];
+
+// ── State ──
+let asFiltered = [...RAW_DATA];
+let rcFiltered = [...RECEIVE_DATA];
+let trFiltered = [...TRANSPORT_DATA];
+let arFiltered = [...ARRIVAL_DATA];
+let ntFiltered = [...NOTE_DATA];
+let bgFiltered = [...BAG_DATA];
+let asSelected = new Set();
+let prodRowIdx = 0;
+let nextId = 999000;
+let asPage = 1;
+let asPageSize = 50;
+
+// ══════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  if (el) el.classList.add('active');
+  else {
+    const navEl = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (navEl) navEl.classList.add('active');
+  }
+  if (page==='allstatus') { asFiltered=[...RAW_DATA]; asRender(); }
+  if (page==='receive') { rcFiltered=[...RECEIVE_DATA]; rcRender(); }
+  if (page==='transport') { trFiltered=[...TRANSPORT_DATA]; trRender(); }
+  if (page==='arrival') { arFiltered=[...ARRIVAL_DATA]; arRender(); }
+  if (page==='notetracking') { ntFiltered=[...NOTE_DATA]; ntRender(); }
+  if (page==='bag') { bgFiltered=[...BAG_DATA]; bgRender(); }
+  if (page==='home') renderHome();
+}
+
+// ══════════════════════════════════
+// HOME
+// ══════════════════════════════════
+function renderHome() {
+  const kg = RAW_DATA.reduce((s,c)=>s+parseFloat(c.box_weight||0),0);
+  const cbm = RAW_DATA.reduce((s,c)=>s+parseFloat(c.box_cbm||0),0);
+  document.getElementById('h-total').textContent = RAW_DATA.length;
+  document.getElementById('h-kg').textContent = fmt(kg);
+  document.getElementById('h-cbm').textContent = cbm.toFixed(1);
+}
+
+// ══════════════════════════════════
+// ALL STATUS
+// ══════════════════════════════════
+function transBadge(t) {
+  if (t==='SEA') return `<span class="badge badge-sea">${t}</span>`;
+  if (t==='AIR') return `<span class="badge badge-air">✈ ${t}</span>`;
+  return `<span class="badge badge-ek">${t}</span>`;
+}
+
+function asRender() {
+  const tbody = document.getElementById('as-tbody');
+  tbody.innerHTML = '';
+  const totalPages = Math.max(1, Math.ceil(asFiltered.length / asPageSize));
+  if (asPage > totalPages) asPage = totalPages;
+  const pageData = asPageSize >= 99999 ? asFiltered : asFiltered.slice((asPage-1)*asPageSize, asPage*asPageSize);
+
+  pageData.forEach(container => {
+    const prods = container.products;
+    const rowspan = prods.length + 1;
+    const printed = container.printed === 'true' || container.printed === true;
+
+    prods.forEach((p, idx) => {
+      const tr = document.createElement('tr');
+      if (idx===0) tr.classList.add('group-start');
+      let cells = '';
+      if (idx===0) {
+        cells += `
+          <td rowspan="${rowspan}" class="align-middle text-center" style="font-size:.72rem">
+            <div style="color:#213df3;font-weight:700">${container.id}</div>
+            <div class="badge-circle mt-1">${container.number}</div>
+          </td>
+          <td rowspan="${rowspan}" class="align-middle text-center">
+            <input type="checkbox" class="as-chk form-check-input" style="transform:scale(1.3)"
+              data-id="${container.id}" ${asSelected.has(container.id)?'checked':''}
+              onchange="asToggleSingle(${container.id},this.checked)">
+          </td>
+          <td rowspan="${rowspan}" class="align-middle" style="min-width:155px">
+            <a href="#" class="text-primary fw-bold" style="font-size:.73rem;text-decoration:none" onclick="asShowDetail(${container.id});return false">${container.sm_code}</a>
+          </td>
+          <td rowspan="${rowspan}" class="align-middle" style="font-size:.68rem;color:#666">${container.container_code||'—'}</td>
+          <td rowspan="${rowspan}" class="align-middle text-center">${transBadge(container.transport_name)}</td>
+          <td rowspan="${rowspan}" class="align-middle" style="white-space:nowrap;font-size:.72rem">${container.sm_date}</td>
+          <td rowspan="${rowspan}" class="align-middle" style="border-right:2px solid #dee2e6">
+            <span class="badge bg-dark">${container.branch_name}</span>
+          </td>`;
+      }
+      cells += `
+        <td style="min-width:90px;font-size:.78rem">${p.product_name||''}</td>
+        <td class="product_detail">${p.dummy_qty||''}</td>
+        <td style="min-width:100px;font-size:.65rem;color:#555">${(p.product_type||'').split('/').pop()||''} ${(p.product_type||'').split('/')[0]||''}</td>
+        <td style="min-width:80px;font-size:.62rem;color:#888">${(p.bag_name&&p.bag_name.length>0&&p.bag_name[0])?p.bag_name.slice(0,1).join(''):''}</td>
+        <td>
+          <span class="truncate-text" title="${esc(p.product_tracking||'')}" onclick="toggleTrk(this)">
+            ${(p.product_tracking||'').length>13?(p.product_tracking||'').slice(0,13)+'…':p.product_tracking||''}
+          </span>
+        </td>
+        <td class="product_detail">${p.product_width||''}</td>
+        <td class="product_detail">${p.product_length||''}</td>
+        <td class="product_detail">${p.product_height||''}</td>
+        <td class="product_detail"><span class="${parseInt(p.product_qty)>=10?'text-danger fw-bold':'text-success fw-bold'}">${p.product_qty||''}</span></td>
+        <td class="product_detail">${p.product_weight_per_item||''}</td>
+        <td class="product_detail" style="font-size:.65rem">${p.product_cbm_per_item||''}</td>`;
+      if (idx===0) {
+        cells += `
+          <td rowspan="${rowspan}" class="align-middle" style="border-left:2px solid #dee2e6">
+            <div class="action-col">
+              <button class="btn btn-sm btn-outline-secondary py-0 px-1" style="font-size:.68rem" title="Detail" onclick="asShowDetail(${container.id})"><i class="bi bi-eye-fill"></i></button>
+              <button class="btn btn-sm btn-outline-success py-0 px-1" style="font-size:.68rem" title="Edit" onclick="showEditModal(${container.id})"><i class="bi bi-pencil-square"></i></button>
+              <button class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:.68rem" title="Delete" onclick="asDelete(${container.id})"><i class="bi bi-trash3-fill"></i></button>
+            </div>
+          </td>
+          <td rowspan="${rowspan}" class="align-middle text-center" style="border-left:2px solid #dee2e6">
+            <a href="#" class="${printed?'text-success':'text-secondary'}" onclick="asPrintOne(${container.id},event)" title="${printed?'Printed':'Not printed'}">
+              ${!printed?'<sup class="text-danger"><i class="bi bi-exclamation-circle-fill"></i></sup>':''}
+              <i class="bi bi-printer-fill"></i>
+            </a>
+          </td>`;
+      }
+      tr.innerHTML = cells;
+      tbody.appendChild(tr);
+    });
+
+    // Total row
+    const tot = document.createElement('tr');
+    tot.classList.add('total-row');
+    tot.innerHTML = `<td colspan="18" class="text-end pe-2 py-1" style="border-top:1px dashed #e0e0e0">
+      <span class="text-danger fw-bold">Total: ${fmt(container.box_weight)} KG &nbsp;/&nbsp; ${parseFloat(container.box_cbm).toFixed(4)} CBM</span>
+    </td><td colspan="2"></td>`;
+    tbody.appendChild(tot);
+  });
+
+  asUpdateStats();
+  asRenderPagination(totalPages);
+}
+
+function toggleTrk(el) {
+  const full = el.title;
+  el.textContent = el.textContent.includes('…') ? full : (full.length>13?full.slice(0,13)+'…':full);
+}
+
+function asRenderPagination(totalPages) {
+  const pg = document.getElementById('as-pagination');
+  const info = document.getElementById('as-page-info');
+  if (!pg) return;
+  info && (info.textContent = `Page ${asPage} / ${totalPages} (${asFiltered.length} records)`);
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+  let html = `<nav aria-label="Page navigation"><ul class="pagination mb-0">`;
+  html += `<li class="page-item ${asPage===1?'disabled':''}"><a class="page-link" href="#" onclick="asGoPage(${asPage-1},event)">‹</a></li>`;
+  for (let i=1; i<=totalPages; i++) {
+    if (i===1||i===totalPages||Math.abs(i-asPage)<=2) {
+      html+=`<li class="page-item ${i===asPage?'active':''}"><a class="page-link" href="#" onclick="asGoPage(${i},event)">${i}</a></li>`;
+    } else if (Math.abs(i-asPage)===3) {
+      html+=`<li class="page-item disabled"><span class="page-link">…</span></li>`;
+    }
+  }
+  html += `<li class="page-item ${asPage===totalPages?'disabled':''}"><a class="page-link" href="#" onclick="asGoPage(${asPage+1},event)">›</a></li>`;
+  html += `</ul></nav>`;
+  pg.innerHTML = html;
+}
+
+function asGoPage(p,e) {
+  if(e) e.preventDefault();
+  const totalPages = Math.max(1,Math.ceil(asFiltered.length/asPageSize));
+  asPage = Math.max(1,Math.min(p,totalPages));
+  asRender();
+}
+
+function asApply() {
+  const s = $('#as-search').val().toLowerCase().trim();
+  const tr = $('#as-transport').val();
+  const br = $('#as-branch').val();
+  const np = $('#as-notprinted').is(':checked');
+  const lim = $('#as-limit').val();
+  asPageSize = lim==='all' ? 99999 : parseInt(lim)||50;
+  asFiltered = RAW_DATA.filter(c => {
+    if (tr && c.transport_name!==tr) return false;
+    if (br && c.branch_name!==br) return false;
+    if (np && (c.printed==='true'||c.printed===true)) return false;
+    if (s) {
+      const hay = (c.sm_code+' '+c.branch_name+' '+c.products.map(p=>p.product_tracking+' '+p.product_name).join(' ')).toLowerCase();
+      if (!hay.includes(s)) return false;
+    }
+    return true;
+  });
+  asPage = 1;
+  asRender();
+}
+
+function asReset() {
+  $('#as-search').val(''); $('#as-transport').val(''); $('#as-branch').val(''); $('#as-notprinted').prop('checked',false);
+  asFiltered=[...RAW_DATA]; asPage=1; asRender();
+}
+
+function asUpdateStats() {
+  const kg = asFiltered.reduce((s,c)=>s+parseFloat(c.box_weight||0),0);
+  const cbm = asFiltered.reduce((s,c)=>s+parseFloat(c.box_cbm||0),0);
+  $('#as-stat-count').html(`<i class="bi bi-layers"></i> ${asFiltered.length} records`);
+  $('#as-stat-kg').html(`<i class="bi bi-box-seam"></i> ${fmt(kg)} KG`);
+  $('#as-stat-cbm').html(`<i class="bi bi-box"></i> ${cbm.toFixed(2)} CBM`);
+  $('#as-sel-count').text(asSelected.size+' selected');
+}
+
+function asToggleSingle(id, checked) {
+  if (checked) asSelected.add(id); else asSelected.delete(id);
+  asUpdateStats();
+}
+
+function asToggleAll(checked) {
+  $('#as-all-chk, #as-all-top').prop('checked', checked);
+  asFiltered.forEach(c => checked ? asSelected.add(c.id) : asSelected.delete(c.id));
+  document.querySelectorAll('.as-chk').forEach(cb => cb.checked = checked);
+  asUpdateStats();
+}
+
+function asDelete(id) {
+  if (!confirm('ลบ #'+id+'?')) return;
+  RAW_DATA = RAW_DATA.filter(c=>c.id!==id);
+  asFiltered = asFiltered.filter(c=>c.id!==id);
+  RECEIVE_DATA = RECEIVE_DATA.filter(r=>r.id!==id);
+  ARRIVAL_DATA = ARRIVAL_DATA.filter(r=>r.id!==id);
+  asRender();
+  showToast('Deleted #'+id, 'bg-danger');
+}
+
+function asShowDetail(id) {
+  const c = RAW_DATA.find(x=>x.id===id);
+  if (!c) return;
+  $('#detailModalTitle').html(`<i class="bi bi-info-circle"></i> ${c.sm_code} &nbsp;|&nbsp; ${c.branch_name} &nbsp;|&nbsp; ${transBadge(c.transport_name)}`);
+  let html = `<table class="table table-sm table-bordered mb-0">
+    <thead class="table-danger"><tr><th>Tracking</th><th>Product</th><th>Dum</th><th>Qty</th><th>W×L×H</th><th>Wt/pc</th><th>CBM/pc</th><th>Type</th></tr></thead><tbody>`;
+  c.products.forEach(p=>{
+    html+=`<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.72rem">${p.product_tracking||''}</td>
+      <td>${p.product_name||''}</td>
+      <td class="text-center">${p.dummy_qty||''}</td>
+      <td class="text-center fw-bold text-danger">${p.product_qty||''}</td>
+      <td style="white-space:nowrap">${p.product_width}×${p.product_length}×${p.product_height}</td>
+      <td>${p.product_weight_per_item||''}</td>
+      <td style="font-size:.68rem">${p.product_cbm_per_item||''}</td>
+      <td style="font-size:.68rem">${p.product_type||''}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table>
+    <div class="p-2 d-flex justify-content-between align-items-center bg-light border-top">
+      <span class="small text-muted">SM Date: ${c.sm_date} &nbsp;|&nbsp; No: ${c.number} &nbsp;|&nbsp; Warehouse: ${c.warehouse_name||'GZ'}</span>
+      <span class="fw-bold text-danger">Total: ${fmt(c.box_weight)} KG / ${parseFloat(c.box_cbm).toFixed(4)} CBM</span>
+    </div>`;
+  $('#detailModalBody').html(html);
+  new bootstrap.Modal('#detailModal').show();
+}
+
+function asPrintOne(id,e) {
+  if(e && e.preventDefault) e.preventDefault();
+  const c = RAW_DATA.find(x=>x.id===id);
+  if (!c) return;
+  c.printed='true';
+  let html = `<div style="font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:1rem;border:2px solid #000;border-radius:8px">
+    <div style="text-align:center;font-size:1.1rem;font-weight:900;border-bottom:2px dashed #000;padding-bottom:.5rem;margin-bottom:.5rem">
+      PCS CARGO LOGISTICS<br>
+      <small style="font-size:.75rem;color:#dc3545">${c.sm_code}</small>
+    </div>
+    <table style="width:100%;font-size:.78rem;margin-bottom:.5rem">
+      <tr><td><b>Branch:</b> ${c.branch_name}</td><td><b>Transport:</b> ${c.transport_name}</td></tr>
+      <tr><td><b>Date:</b> ${c.sm_date}</td><td><b>No.:</b> ${c.number}</td></tr>
+    </table>
+    <hr style="margin:.4rem 0">`;
+  c.products.forEach(p=>{
+    html+=`<div style="margin:.3rem 0;padding:.3rem;background:#f8f8f8;border-radius:4px;border-left:3px solid #dc3545">
+      <b>${p.product_name}</b> — Trk: ${p.product_tracking}<br>
+      <small>Qty: ${p.product_qty} | ${p.product_width}×${p.product_length}×${p.product_height} cm | ${p.product_weight_per_item}kg/pc | CBM: ${p.product_cbm_per_item}</small>
+    </div>`;
+  });
+  html+=`<div style="text-align:right;margin-top:.5rem;font-weight:700;color:#dc3545">
+    Total: ${fmt(c.box_weight)} KG / ${parseFloat(c.box_cbm).toFixed(4)} CBM
+  </div></div>`;
+  document.getElementById('sticker-body').innerHTML = html;
+  new bootstrap.Modal('#stickerModal').show();
+  asRender();
+}
+
+function asPrintMulti() {
+  const ids = asSelected.size>0 ? [...asSelected] : asFiltered.map(c=>c.id);
+  if (!ids.length) { showToast('กรุณาเลือกรายการก่อน','bg-warning text-dark'); return; }
+  const data = RAW_DATA.filter(c=>ids.includes(c.id));
+  let html='';
+  data.forEach(c=>{
+    c.printed='true';
+    html+=`<div style="page-break-after:always;border:2px solid #000;padding:1rem;margin-bottom:1rem;border-radius:8px;font-family:monospace">
+      <div style="text-align:center;font-weight:900;font-size:1rem;color:#dc3545">PCS CARGO</div>
+      <div style="font-size:.82rem">${c.sm_code} | ${c.branch_name} | ${c.transport_name} | ${c.sm_date}</div>`;
+    c.products.forEach(p=>{
+      html+=`<div style="font-size:.78rem;margin:.2rem 0;border-left:2px solid #dc3545;padding-left:.5rem">• ${p.product_name} | ${p.product_tracking} | Qty:${p.product_qty} | ${p.product_width}×${p.product_length}×${p.product_height}</div>`;
+    });
+    html+=`<div style="text-align:right;font-weight:700;color:#dc3545;border-top:1px dashed #ccc;margin-top:.3rem;padding-top:.3rem">
+      Total: ${fmt(c.box_weight)} KG / ${parseFloat(c.box_cbm).toFixed(4)} CBM</div></div>`;
+  });
+  document.getElementById('sticker-body').innerHTML=html;
+  new bootstrap.Modal('#stickerModal').show();
+  asRender();
+}
+
+// ══════════════════════════════════
+// CREATE / EDIT
+// ══════════════════════════════════
+function crResetImageSlots() {
+  const container = document.getElementById('cr-image-slots');
+  if (!container) return;
+  container.innerHTML='';
+  for (let i=0; i<6; i++) {
+    const slot = document.createElement('div');
+    slot.className='img-slot';
+    slot.dataset.idx=i;
+    slot.innerHTML=`
+      <div class="text-muted text-center p-2" style="pointer-events:none">
+        <i class="bi bi-plus-circle" style="font-size:1.5rem;color:#ccc"></i><br>
+        <small style="font-size:.65rem">Add Photo</small>
+      </div>
+      <input type="file" accept="image/*" onchange="crPreviewImg(this,${i})">`;
+    container.appendChild(slot);
+  }
+}
+
+function crPreviewImg(input, idx) {
+  if (!input.files[0]) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const slot=input.closest('.img-slot');
+    slot.innerHTML=`
+      <img src="${e.target.result}" onclick="openLightbox('${e.target.result}')">
+      <button class="img-slot-del" onclick="crDelImg(this,${idx})"><i class="bi bi-x"></i></button>
+      <input type="file" accept="image/*" onchange="crPreviewImg(this,${idx})" style="display:none">`;
+    slot.classList.add('has-img');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function crDelImg(btn, idx) {
+  const slot=btn.closest('.img-slot');
+  slot.classList.remove('has-img');
+  slot.innerHTML=`
+    <div class="text-muted text-center p-2" style="pointer-events:none">
+      <i class="bi bi-plus-circle" style="font-size:1.5rem;color:#ccc"></i><br>
+      <small style="font-size:.65rem">Add Photo</small>
+    </div>
+    <input type="file" accept="image/*" onchange="crPreviewImg(this,${idx})">`;
+}
+
+function crRenderImages(images) {
+  const container=document.getElementById('cr-image-slots');
+  if (!container) return;
+  container.innerHTML='';
+  for (let i=0; i<6; i++) {
+    const slot=document.createElement('div');
+    slot.className='img-slot'+(images&&images[i]?' has-img':'');
+    slot.dataset.idx=i;
+    if (images&&images[i]) {
+      slot.innerHTML=`
+        <img src="${images[i]}" onclick="openLightbox('${images[i]}')">
+        <button class="img-slot-del" onclick="crDelImg(this,${i})"><i class="bi bi-x"></i></button>
+        <input type="file" accept="image/*" onchange="crPreviewImg(this,${i})" style="display:none">`;
+    } else {
+      slot.innerHTML=`
+        <div class="text-muted text-center p-2" style="pointer-events:none">
+          <i class="bi bi-plus-circle" style="font-size:1.5rem;color:#ccc"></i><br>
+          <small style="font-size:.65rem">Add Photo</small>
+        </div>
+        <input type="file" accept="image/*" onchange="crPreviewImg(this,${i})">`;
+    }
+    container.appendChild(slot);
+  }
+}
+
+function sphPreview(input, bodyId, dateId) {
+  if (!input.files[0]) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const body=document.getElementById(bodyId);
+    body.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="openLightbox('${e.target.result}')">
+      <input type="file" accept="image/*" onchange="sphPreview(this,'${bodyId}','${dateId}')">`;
+    document.getElementById(dateId).textContent='Date: '+new Date().toLocaleDateString('th-TH');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function crRenderHistory(logs) {
+  const el=document.getElementById('cr-history-list');
+  if (!el) return;
+  if (!logs||!logs.length) {
+    el.innerHTML='<div class="text-muted small text-center py-4"><i class="bi bi-clock text-muted" style="font-size:2rem"></i><br>No history</div>';
+    return;
+  }
+  el.innerHTML=logs.map(l=>`
+    <div class="history-item ${l.action==='CREATE'?'create':l.action==='DELETE'?'delete':'update'}">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="badge ${l.action==='CREATE'?'bg-success':l.action==='DELETE'?'bg-danger':'bg-warning text-dark'}">${l.action}</span>
+        <span class="fw-bold small">${l.target} #${l.target_id}</span>
+        <span class="text-muted small">วันที่: ${l.date}</span>
+        <span class="small">แก้โดย: <strong style="color:var(--primary)">${l.by}</strong></span>
+      </div>
+      <div class="text-muted small mt-1">${l.detail}</div>
+    </div>`).join('');
+}
+
+function crUpdateTotals() {
+  const rows=document.querySelectorAll('#product-rows tr.pr-row');
+  let tQty=0, tWt=0, tCbm=0;
+  rows.forEach(row=>{
+    const qty=parseInt(row.querySelector('.pr-qty')?.value)||0;
+    const wt=parseFloat(row.querySelector('.pr-wt')?.value)||0;
+    const cbm=parseFloat(row.querySelector('.pr-cbm')?.value)||0;
+    const wtAll=parseFloat(row.querySelector('.pr-wt-all')?.value)||0;
+    tQty+=qty;
+    tWt+=wtAll||(wt*qty);
+    tCbm+=cbm*qty;
+  });
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+  const st=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  sv('cr-total-qty',tQty||'');
+  sv('cr-total-kg',tWt?tWt.toFixed(4):'');
+  sv('cr-total-cbm',tCbm?tCbm.toFixed(6):'');
+  st('cr-foot-qty',tQty);
+  st('cr-foot-kg',tWt.toFixed(2));
+  st('cr-foot-cbm',tCbm.toFixed(4));
+}
+
+function showCreateModal() {
+  const modal=document.getElementById('createModal');
+  modal.dataset.editId='';
+  document.getElementById('cr-modal-header').style.background='var(--green)';
+  document.getElementById('cr-modal-title').innerHTML='<i class="bi bi-plus-circle"></i> 創建數據 / สร้างข้อมูลใหม่';
+  document.getElementById('cr-modal-subtitle').textContent='';
+  document.getElementById('cr-print-btn').classList.add('d-none');
+  const today=new Date().toISOString().slice(0,10);
+  ['cr-smcode','cr-custcode','cr-orderno','cr-note','cr-container'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cr-number').value='1';
+  document.getElementById('cr-branch').value='TTP';
+  document.getElementById('cr-warehouse').value='GZ';
+  document.getElementById('cr-transport').value='EK';
+  document.getElementById('cr-date').value=today;
+  document.getElementById('cr-amount').value='';
+  document.getElementById('product-rows').innerHTML='';
+  prodRowIdx=0;
+  addProductRow();
+  crUpdateTotals();
+  crResetImageSlots();
+  crRenderHistory([]);
+  // Reset status photos
+  ['cn','ship','th','del'].forEach(k=>{
+    const b=document.getElementById('sph-'+k);
+    if(b){b.innerHTML=`<span class="text-muted small">No Image</span><input type="file" accept="image/*" onchange="sphPreview(this,'sph-${k}','sph-${k}-date')">`;}
+    const d=document.getElementById('sph-'+k+'-date');
+    if(d) d.textContent='Date: N/A';
+  });
+  new bootstrap.Modal('#createModal').show();
+}
+
+function showEditModal(id) {
+  const c=RAW_DATA.find(x=>x.id===id);
+  if (!c) return;
+  const modal=document.getElementById('createModal');
+  modal.dataset.editId=id;
+  document.getElementById('cr-modal-header').style.background='var(--primary)';
+  document.getElementById('cr-modal-title').innerHTML=`<i class="bi bi-pencil-square"></i> แก้ไขคอนเทนเนอร์ 修改信息`;
+  document.getElementById('cr-modal-subtitle').textContent=c.sm_code;
+  document.getElementById('cr-print-btn').classList.remove('d-none');
+  // Fill header
+  const smPart=c.sm_code.includes('-')?c.sm_code.split('-')[0]:c.sm_code;
+  document.getElementById('cr-smcode').value=smPart;
+  document.getElementById('cr-number').value=c.number||'1';
+  document.getElementById('cr-branch').value=c.branch_name;
+  document.getElementById('cr-custcode').value=c.costomer_code||(c.sm_code.includes('-')?c.sm_code.split('-').slice(1).join('-'):'');
+  document.getElementById('cr-orderno').value=c.order_no||'';
+  document.getElementById('cr-warehouse').value=c.warehouse_name||'GZ';
+  document.getElementById('cr-transport').value=c.transport_name==='SEA'?'SEA':c.transport_name==='AIR'?'AIR':'EK';
+  document.getElementById('cr-date').value=c.sm_date;
+  document.getElementById('cr-note').value=c.note||'';
+  document.getElementById('cr-amount').value=c.amount||'';
+  document.getElementById('cr-container').value=c.container_code||'';
+  // Products
+  document.getElementById('product-rows').innerHTML='';
+  prodRowIdx=0;
+  c.products.forEach(p=>addProductRow(p));
+  crUpdateTotals();
+  // Images
+  crRenderImages(c.images||[]);
+  // History
+  crRenderHistory(c.history_logs&&c.history_logs.length?c.history_logs:[
+    {action:'CREATE',target:'container',target_id:c.id,date:c.sm_date+' 08:00',by:'System',detail:'สร้าง container #'+c.id}
+  ]);
+  new bootstrap.Modal('#createModal').show();
+}
+
+function crPrintSticker() {
+  const id=parseInt(document.getElementById('createModal').dataset.editId);
+  if(id){
+    const bsModal=bootstrap.Modal.getInstance(document.getElementById('createModal'));
+    if(bsModal) bsModal.hide();
+    setTimeout(()=>asPrintOne(id,null),350);
+  }
+}
+
+function addProductRow(data={}) {
+  prodRowIdx++;
+  const idx=prodRowIdx;
+  const tbody=document.getElementById('product-rows');
+  const tr=document.createElement('tr');
+  tr.className='pr-row';
+  tr.id='pr-'+idx;
+  const wt=parseFloat(data.product_weight_per_item)||0;
+  const qty=parseInt(data.product_qty)||1;
+  const cbm=parseFloat(data.product_cbm_per_item)||0;
+  const wtAll=data.product_weight_all||(wt*qty?(wt*qty).toFixed(2):'');
+  const cbmAll=data.product_cbm_all||(cbm*qty?(cbm*qty).toFixed(6):'');
+  tr.innerHTML=`
+    <td class="text-center text-muted" style="font-size:.68rem">${idx}</td>
+    <td>
+      <select class="form-select form-select-sm pr-type" style="min-width:105px" onchange="crUpdateTotals()">
+        <option ${(data.product_type||'').includes('G')?'selected':''}>普通货物/ทั่วไป/G</option>
+        <option ${(data.product_type||'').includes('B')?'selected':''}>名牌/ลิขสิทธิ์/B</option>
+        <option ${(data.product_type||'').includes('F')?'selected':''}>药和食物/อย./F</option>
+        <option ${(data.product_type||'').includes('T')?'selected':''}>电器/มอก./T</option>
+      </select>
+    </td>
+    <td><input type="text" class="form-control form-control-sm pr-name" value="${esc(data.product_name||'')}" style="min-width:110px"></td>
+    <td><input type="number" class="form-control form-control-sm pr-dummy" value="${data.dummy_qty||''}" style="width:52px"></td>
+    <td><input type="text" class="form-control form-control-sm pr-tracking" value="${esc(data.product_tracking||'')}" style="min-width:115px;font-family:'JetBrains Mono',monospace;font-size:.72rem"></td>
+    <td><input type="number" class="form-control form-control-sm pr-wt" step="0.01" value="${wt||''}" style="width:58px" oninput="crCalcRow(this)"></td>
+    <td><input type="number" class="form-control form-control-sm pr-w" value="${data.product_width||''}" style="width:44px" oninput="crCalcRow(this)"></td>
+    <td><input type="number" class="form-control form-control-sm pr-l" value="${data.product_length||''}" style="width:44px" oninput="crCalcRow(this)"></td>
+    <td><input type="number" class="form-control form-control-sm pr-h" value="${data.product_height||''}" style="width:44px" oninput="crCalcRow(this)"></td>
+    <td><input type="number" class="form-control form-control-sm pr-qty" value="${qty}" min="1" style="width:55px" oninput="crCalcRow(this)"></td>
+    <td>
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control form-control-sm pr-wt-all" value="${wtAll}" style="min-width:50px" oninput="crUpdateTotals()">
+        <button type="button" class="btn btn-outline-secondary btn-sm px-1" onclick="crClearWt(this)"><i class="bi bi-x" style="font-size:.6rem"></i></button>
+      </div>
+    </td>
+    <td><input type="text" class="form-control form-control-sm pr-cbm bg-light" value="${cbm||''}" style="width:70px" readonly></td>
+    <td><input type="text" class="form-control form-control-sm pr-cbm-all bg-light" value="${cbmAll}" style="width:70px" readonly></td>
+    <td><button type="button" class="btn btn-outline-danger btn-sm px-1 py-0" onclick="document.getElementById('pr-${idx}').remove();crUpdateTotals()"><i class="bi bi-x"></i></button></td>`;
+  tbody.appendChild(tr);
+}
+
+function crCalcRow(input) {
+  const row=input.closest('tr.pr-row');
+  if (!row) return;
+  const w=parseFloat(row.querySelector('.pr-w')?.value)||0;
+  const l=parseFloat(row.querySelector('.pr-l')?.value)||0;
+  const h=parseFloat(row.querySelector('.pr-h')?.value)||0;
+  const qty=parseInt(row.querySelector('.pr-qty')?.value)||1;
+  const wt=parseFloat(row.querySelector('.pr-wt')?.value)||0;
+  if (w&&l&&h) {
+    const cbm=(w*l*h)/1000000;
+    row.querySelector('.pr-cbm').value=cbm.toFixed(6);
+    row.querySelector('.pr-cbm-all').value=(cbm*qty).toFixed(6);
+  }
+  if (wt&&qty) {
+    const wtAllEl=row.querySelector('.pr-wt-all');
+    if (!wtAllEl.value) wtAllEl.value=(wt*qty).toFixed(2);
+  }
+  crUpdateTotals();
+}
+
+function crClearWt(btn) {
+  const row=btn.closest('tr.pr-row');
+  if (!row) return;
+  row.querySelector('.pr-wt-all').value='';
+  row.querySelector('.pr-wt').value='';
+  crUpdateTotals();
+}
+
+function saveCreate() {
+  const smCodePart=document.getElementById('cr-smcode').value.trim();
+  const custCode=document.getElementById('cr-custcode').value.trim();
+  const branch=document.getElementById('cr-branch').value;
+  const transport=document.getElementById('cr-transport').value;
+  const date=document.getElementById('cr-date').value;
+  const container=document.getElementById('cr-container').value.trim();
+  const note=document.getElementById('cr-note').value.trim();
+  const amount=document.getElementById('cr-amount').value;
+  const number=document.getElementById('cr-number').value;
+  const warehouse=document.getElementById('cr-warehouse').value;
+  const orderno=document.getElementById('cr-orderno').value.trim();
+  if (!smCodePart||!date) { showToast('กรุณากรอก SM Code และวันที่','bg-warning text-dark'); return; }
+  const smCode=custCode?`${smCodePart}-${custCode}`:smCodePart;
+  const rows=document.querySelectorAll('#product-rows tr.pr-row');
+  if (!rows.length) { showToast('กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการ','bg-warning text-dark'); return; }
+  const products=[];
+  let tWt=0,tCbm=0,tQty=0;
+  rows.forEach(row=>{
+    const qty=parseInt(row.querySelector('.pr-qty').value)||1;
+    const wt=parseFloat(row.querySelector('.pr-wt').value)||0;
+    const cbm=parseFloat(row.querySelector('.pr-cbm').value)||0;
+    const wtAll=parseFloat(row.querySelector('.pr-wt-all').value)||0;
+    const wtEff=wtAll||(wt*qty);
+    tWt+=wtEff; tCbm+=cbm*qty; tQty+=qty;
+    products.push({
+      product_name:row.querySelector('.pr-name').value,
+      product_tracking:row.querySelector('.pr-tracking').value,
+      product_type:row.querySelector('.pr-type').value,
+      product_qty:String(qty),
+      dummy_qty:row.querySelector('.pr-dummy').value||null,
+      product_width:row.querySelector('.pr-w').value,
+      product_length:row.querySelector('.pr-l').value,
+      product_height:row.querySelector('.pr-h').value,
+      product_weight_per_item:String(wt),
+      product_cbm_per_item:String(cbm),
+      product_weight_all:String(wtEff||''),
+      product_cbm_all:String((cbm*qty).toFixed(6)),
+      bag_name:[]
+    });
+  });
+  const transportId=transport==='SEA'?2:transport==='AIR'?3:1;
+  const editId=document.getElementById('createModal').dataset.editId;
+  const now=new Date().toISOString().replace('T',' ').slice(0,19);
+  if (editId) {
+    const i=RAW_DATA.findIndex(x=>x.id===parseInt(editId));
+    if (i>=0) {
+      const ex=RAW_DATA[i];
+      const logs=[...(ex.history_logs||[])];
+      logs.unshift({action:'UPDATE',target:'container',target_id:ex.id,date:now,by:'Admin',detail:`แก้ไข container #${ex.id}`});
+      RAW_DATA[i]={...ex,sm_code:smCode,branch_name:branch,transport_name:transport,transport_id:transportId,sm_date:date,container_code:container||null,number,warehouse_name:warehouse,costomer_code:custCode,order_no:orderno,note,amount:amount||null,products,box_weight:tWt.toFixed(4),box_cbm:tCbm.toFixed(6),box_total:String(tQty),history_logs:logs};
+      // Sync RECEIVE_DATA
+      const ri=RECEIVE_DATA.findIndex(r=>r.id===parseInt(editId));
+      if(ri>=0){RECEIVE_DATA[ri]={...RECEIVE_DATA[ri],sm_code:smCode,branch,product:products[0].product_name,qty:tQty,weight:tWt,cbm:tCbm};}
+    }
+    showToast('✅ Updated: '+smCode,'bg-success');
+  } else {
+    nextId++;
+    const newRec={id:nextId,branch_id:1,transport_id:transportId,sm_code:smCode,number,sm_date:date,printed:'false',products,transport_name:transport,branch_name:branch,box_weight:tWt.toFixed(4),box_cbm:tCbm.toFixed(6),box_total:String(tQty),container_code:container||null,costomer_code:custCode,order_no:orderno,warehouse_name:warehouse,note,amount:amount||null,images:[],history_logs:[{action:'CREATE',target:'container',target_id:nextId,date:now,by:'Admin',detail:`สร้าง container #${nextId}`}],created_by:'Admin'};
+    RAW_DATA.unshift(newRec);
+    RECEIVE_DATA.unshift({id:nextId,sm_code:smCode,branch,product:products[0].product_name,tracking:products[0].product_tracking,qty:tQty,weight:tWt,cbm:tCbm,receive_date:date,status:'pending'});
+    showToast('✅ Created: '+smCode,'bg-success');
+  }
+  bootstrap.Modal.getInstance(document.getElementById('createModal'))?.hide();
+  asFiltered=[...RAW_DATA]; asPage=1; asRender();
+  renderHome();
+}
+
+// ══════════════════════════════════
+// EXPORT
+// ══════════════════════════════════
+function doExport(type) {
+  let data;
+  const ids=asSelected.size>0?[...asSelected]:asFiltered.map(c=>c.id);
+  if (type==='land') data=RAW_DATA.filter(c=>ids.includes(c.id)&&c.transport_name==='EK');
+  else if (type==='sea') data=RAW_DATA.filter(c=>ids.includes(c.id)&&c.transport_name==='SEA');
+  else if (type==='air') data=RAW_DATA.filter(c=>ids.includes(c.id)&&c.transport_name==='AIR');
+  else data=RAW_DATA.filter(c=>ids.includes(c.id));
+  const rows=[['ID','SM Code','Branch','Transport','Date','Container','Tracking','Product','Dummy','Qty','W','L','H','Wt/pc','CBM/pc','Type','Total KG','Total CBM']];
+  data.forEach(c=>{c.products.forEach(p=>{rows.push([c.id,c.sm_code,c.branch_name,c.transport_name,c.sm_date,c.container_code||'',p.product_tracking,p.product_name,p.dummy_qty||'',p.product_qty,p.product_width,p.product_length,p.product_height,p.product_weight_per_item,p.product_cbm_per_item,p.product_type,c.box_weight,c.box_cbm]);});});
+  const csv=rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  dlCSV(csv,`pcs_export_${type}_${Date.now()}.csv`);
+  bootstrap.Modal.getInstance(document.getElementById('exportModal'))?.hide();
+  showToast('Exported '+data.length+' records','bg-success');
+}
+function dlCSV(csv,name) {
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════
+// RECEIVE
+// ══════════════════════════════════
+function rcRender() {
+  const tbody=document.getElementById('rc-tbody'); tbody.innerHTML='';
+  const statusMap={pending:'status-pending',transit:'status-transit',arrived:'status-arrived',delivered:'status-delivered'};
+  const labelMap={pending:'Pending',transit:'In Transit',arrived:'Arrived',delivered:'Delivered'};
+  rcFiltered.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#213df3;font-weight:700;font-size:.72rem">${r.id}</td>
+      <td><a href="#" class="text-primary fw-bold" style="font-size:.72rem;text-decoration:none" onclick="showEditFromSM('${r.sm_code}');return false">${r.sm_code}</a></td>
+      <td><span class="badge bg-dark">${r.branch}</span></td>
+      <td style="font-size:.8rem">${r.product}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.68rem">${r.tracking}</td>
+      <td class="text-center fw-bold">${r.qty}</td>
+      <td class="text-center">${fmt(r.weight)}</td>
+      <td class="text-center" style="font-size:.72rem">${r.cbm.toFixed(4)}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${r.receive_date}</td>
+      <td><span class="status-badge ${statusMap[r.status]}">${labelMap[r.status]}</span></td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="rcUpdateStatus(${r.id})" title="Next Status" style="font-size:.68rem"><i class="bi bi-arrow-repeat"></i></button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="rcDelete(${r.id})" title="Delete" style="font-size:.68rem"><i class="bi bi-trash3"></i></button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  $('#rc-stat-count').text(rcFiltered.length+' records');
+  $('#rc-stat-pending').text(rcFiltered.filter(r=>r.status==='pending').length+' Pending');
+}
+function rcApply() {
+  const s=$('#rc-search').val().toLowerCase().trim();
+  const br=$('#rc-branch').val();
+  rcFiltered=RECEIVE_DATA.filter(r=>{
+    if(br&&r.branch!==br) return false;
+    if(s&&!(r.sm_code+' '+r.tracking+' '+r.product).toLowerCase().includes(s)) return false;
+    return true;
+  }); rcRender();
+}
+function rcReset(){$('#rc-search').val('');$('#rc-branch').val('');rcFiltered=[...RECEIVE_DATA];rcRender();}
+const rcStatuses=['pending','transit','arrived','delivered'];
+function rcUpdateStatus(id){
+  const r=RECEIVE_DATA.find(x=>x.id===id);
+  if(!r) return;
+  r.status=rcStatuses[(rcStatuses.indexOf(r.status)+1)%4];
+  rcFiltered=rcFiltered.map(x=>x.id===id?{...r}:x);
+  rcRender(); showToast('Status → '+r.status,'bg-info text-dark');
+}
+function rcDelete(id){
+  if(!confirm('Delete?')) return;
+  RECEIVE_DATA=RECEIVE_DATA.filter(x=>x.id!==id);
+  rcFiltered=rcFiltered.filter(x=>x.id!==id);
+  rcRender(); showToast('Deleted','bg-danger');
+}
+function showEditFromSM(smCode) {
+  const c=RAW_DATA.find(x=>x.sm_code===smCode);
+  if(c) showEditModal(c.id);
+}
+
+// ══════════════════════════════════
+// TRANSPORT
+// ══════════════════════════════════
+function trRender(){
+  const tbody=document.getElementById('tr-tbody'); tbody.innerHTML='';
+  const statusMap={pending:'status-pending',transit:'status-transit',arrived:'status-arrived',delivered:'status-delivered'};
+  const labelMap={pending:'Pending',transit:'In Transit',arrived:'Arrived',delivered:'Delivered'};
+  trFiltered.forEach(t=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#213df3;font-weight:700;font-size:.72rem">${t.id}</td>
+      <td style="font-weight:700;font-size:.82rem">${t.code}</td>
+      <td class="text-center">${transBadge(t.type)}</td>
+      <td><span class="badge bg-dark">${t.branch}</span></td>
+      <td style="white-space:nowrap;font-size:.72rem">${t.depart}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${t.eta}</td>
+      <td class="text-center fw-bold">${t.items}</td>
+      <td class="text-center" style="font-size:.78rem">${fmt(t.kg)}</td>
+      <td class="text-center" style="font-size:.78rem">${t.cbm.toFixed(1)}</td>
+      <td><span class="status-badge ${statusMap[t.status]}">${labelMap[t.status]}</span></td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-success py-0 px-1" onclick="trUpdateStatus('${t.id}')" title="Next Status" style="font-size:.68rem"><i class="bi bi-arrow-right-circle"></i></button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  const ek=trFiltered.filter(x=>x.type==='EK').length;
+  const sea=trFiltered.filter(x=>x.type==='SEA').length;
+  const air=trFiltered.filter(x=>x.type==='AIR').length;
+  $('#tr-stat-count').text(trFiltered.length+' Containers');
+  $('#tr-stat-ek').text(ek+' EK');
+  $('#tr-stat-sea').text(sea+' SEA');
+  $('#tr-stat-air').text(air+' AIR');
+}
+function trApply(){
+  const s=$('#tr-search').val().toLowerCase();
+  const tp=$('#tr-type').val();
+  trFiltered=TRANSPORT_DATA.filter(t=>{
+    if(tp&&t.type!==tp) return false;
+    if(s&&!(t.code+' '+t.branch).toLowerCase().includes(s)) return false;
+    return true;
+  }); trRender();
+}
+function trReset(){$('#tr-search').val('');$('#tr-type').val('');trFiltered=[...TRANSPORT_DATA];trRender();}
+const trStatuses=['pending','transit','arrived','delivered'];
+function trUpdateStatus(id){
+  const t=TRANSPORT_DATA.find(x=>x.id===id);
+  if(!t) return;
+  t.status=trStatuses[(trStatuses.indexOf(t.status)+1)%4];
+  trFiltered=trFiltered.map(x=>x.id===id?{...t}:x);
+  trRender(); showToast('Status → '+t.status,'bg-info text-dark');
+}
+function showContainerModal(){
+  document.getElementById('ctn-depart').value=new Date().toISOString().slice(0,10);
+  document.getElementById('ctn-eta').value='';
+  document.getElementById('ctn-code').value='';
+  new bootstrap.Modal('#containerModal').show();
+}
+function saveContainer(){
+  const code=document.getElementById('ctn-code').value.trim();
+  const type=document.getElementById('ctn-type').value;
+  const branch=document.getElementById('ctn-branch').value;
+  const depart=document.getElementById('ctn-depart').value;
+  const eta=document.getElementById('ctn-eta').value;
+  if(!code||!depart){showToast('กรุณากรอก Container Code และวันที่','bg-warning text-dark');return;}
+  TRANSPORT_DATA.unshift({id:'CTN-'+Date.now(),code,type,branch,depart,eta,items:0,kg:0,cbm:0,status:'pending'});
+  trFiltered=[...TRANSPORT_DATA];
+  trRender();
+  bootstrap.Modal.getInstance(document.getElementById('containerModal'))?.hide();
+  showToast('สร้างตู้: '+code,'bg-success');
+}
+
+// ══════════════════════════════════
+// ARRIVAL
+// ══════════════════════════════════
+function arRender(){
+  const tbody=document.getElementById('ar-tbody'); tbody.innerHTML='';
+  const statusMap={arrived:'status-arrived',delivered:'status-delivered'};
+  const labelMap={arrived:'Arrived',delivered:'Delivered'};
+  arFiltered.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#213df3;font-weight:700;font-size:.72rem">${r.id}</td>
+      <td><a href="#" class="text-primary fw-bold" style="font-size:.72rem;text-decoration:none" onclick="showEditFromSM('${r.sm_code}');return false">${r.sm_code}</a></td>
+      <td><span class="badge bg-dark">${r.branch}</span></td>
+      <td style="font-size:.8rem">${r.product}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.68rem">${r.tracking}</td>
+      <td class="text-center" style="font-size:.78rem">${fmt(r.weight)}</td>
+      <td class="text-center" style="font-size:.72rem">${r.cbm.toFixed(4)}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${r.arrival_date}</td>
+      <td><span class="status-badge ${statusMap[r.status]||'status-transit'}">${labelMap[r.status]||r.status}</span></td>
+      <td style="font-size:.8rem">${r.customer}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-success py-0 px-1" onclick="arMarkDelivered(${r.id})" title="Mark Delivered" style="font-size:.68rem"><i class="bi bi-check-circle"></i></button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  $('#ar-stat-count').text(arFiltered.length+' records');
+  $('#ar-stat-arr').text(arFiltered.filter(x=>x.status==='arrived').length+' Arrived');
+  $('#ar-stat-del').text(arFiltered.filter(x=>x.status==='delivered').length+' Delivered');
+}
+function arApply(){const s=$('#ar-search').val().toLowerCase();arFiltered=ARRIVAL_DATA.filter(r=>!(s&&!(r.sm_code+' '+r.tracking+' '+r.product+' '+r.customer).toLowerCase().includes(s)));arRender();}
+function arReset(){$('#ar-search').val('');arFiltered=[...ARRIVAL_DATA];arRender();}
+function arMarkDelivered(id){
+  const r=ARRIVAL_DATA.find(x=>x.id===id);
+  if(r){r.status='delivered';arFiltered=arFiltered.map(x=>x.id===id?{...r}:x);}
+  arRender(); showToast('Marked as Delivered ✅','bg-success');
+}
+function showArrivalModal(){
+  document.getElementById('arr-smcode').value='';
+  document.getElementById('arr-customer').value='';
+  document.getElementById('arr-date').value=new Date().toISOString().slice(0,10);
+  new bootstrap.Modal('#arrivalModal').show();
+}
+function saveArrival(){
+  const smcode=document.getElementById('arr-smcode').value.trim();
+  const customer=document.getElementById('arr-customer').value.trim();
+  const date=document.getElementById('arr-date').value;
+  const status=document.getElementById('arr-status').value;
+  if(!smcode){showToast('กรุณากรอก SM Code','bg-warning text-dark');return;}
+  const found=RAW_DATA.find(c=>c.sm_code.toLowerCase().includes(smcode.toLowerCase()));
+  if(!found){showToast('ไม่พบ SM Code: '+smcode,'bg-danger');return;}
+  const ex=ARRIVAL_DATA.find(a=>a.id===found.id);
+  if(ex){ex.status=status;ex.arrival_date=date;if(customer)ex.customer=customer;}
+  else{ARRIVAL_DATA.unshift({id:found.id,sm_code:found.sm_code,branch:found.branch_name,product:found.products.map(p=>p.product_name).join(', '),tracking:found.products[0].product_tracking,weight:parseFloat(found.box_weight),cbm:parseFloat(found.box_cbm),arrival_date:date,status,customer:customer||'—'});}
+  arFiltered=[...ARRIVAL_DATA];
+  arRender();
+  bootstrap.Modal.getInstance(document.getElementById('arrivalModal'))?.hide();
+  showToast('บันทึกการมาถึง: '+found.sm_code,'bg-success');
+}
+
+// ══════════════════════════════════
+// NOTE TRACKING
+// ══════════════════════════════════
+function ntRender(){
+  const container=document.getElementById('nt-cards'); container.innerHTML='';
+  const statusColor={รับของแล้ว:'success',กำลังขนส่ง:'warning text-dark',ถึงไทยแล้ว:'info text-dark',ส่งให้ลูกค้าแล้ว:'primary'};
+  ntFiltered.forEach(n=>{
+    const div=document.createElement('div');
+    div.className='bag-card';
+    div.innerHTML=`<div class="d-flex justify-content-between align-items-start flex-wrap gap-1">
+      <div>
+        <span class="fw-bold text-primary" style="font-family:'JetBrains Mono',monospace">${n.tracking}</span>
+        <span class="badge bg-${statusColor[n.status]||'secondary'} ms-2">${n.status}</span>
+        ${n.sm?`<span class="text-muted small ms-1">| ${n.sm}</span>`:''}
+      </div>
+      <div class="d-flex gap-1 align-items-center">
+        <span class="text-muted small">${n.date}</span>
+        <button class="btn btn-sm btn-outline-danger ms-1 py-0 px-1" onclick="ntDelete(${n.id})" style="font-size:.68rem"><i class="bi bi-trash3"></i></button>
+      </div>
+    </div>
+    <div class="mt-1 text-dark small">${n.note}</div>
+    <div class="mt-1"><small class="text-muted">By: <strong>${n.created_by}</strong></small></div>`;
+    container.appendChild(div);
+  });
+  $('#nt-stat-count').text(ntFiltered.length+' notes');
+}
+function ntApply(){const s=$('#nt-search').val().toLowerCase();ntFiltered=NOTE_DATA.filter(n=>!(s&&!(n.tracking+' '+n.sm+' '+n.note).toLowerCase().includes(s)));ntRender();}
+function ntReset(){$('#nt-search').val('');ntFiltered=[...NOTE_DATA];ntRender();}
+function ntDelete(id){NOTE_DATA=NOTE_DATA.filter(x=>x.id!==id);ntFiltered=ntFiltered.filter(x=>x.id!==id);ntRender();showToast('Deleted','bg-danger');}
+function showNoteModal(){
+  document.getElementById('nt-input-tracking').value='';
+  document.getElementById('nt-input-sm').value='';
+  document.getElementById('nt-input-note').value='';
+  new bootstrap.Modal('#noteModal').show();
+}
+function saveNote(){
+  const tracking=document.getElementById('nt-input-tracking').value.trim();
+  const sm=document.getElementById('nt-input-sm').value.trim();
+  const status=document.getElementById('nt-input-status').value;
+  const note=document.getElementById('nt-input-note').value.trim();
+  if(!tracking){showToast('กรุณากรอก Tracking Number','bg-warning text-dark');return;}
+  const n={id:Date.now(),tracking,sm,status,note,date:new Date().toISOString().slice(0,10),created_by:'Admin'};
+  NOTE_DATA.unshift(n);ntFiltered.unshift(n);
+  ntRender(); bootstrap.Modal.getInstance(document.getElementById('noteModal'))?.hide();
+  showToast('Note saved! ✅','bg-success');
+}
+
+// ══════════════════════════════════
+// BAG
+// ══════════════════════════════════
+function bgRender(){
+  const tbody=document.getElementById('bg-tbody'); tbody.innerHTML='';
+  const sm={open:'bg-warning text-dark',closed:'bg-secondary',shipped:'bg-success'};
+  bgFiltered.forEach(b=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#213df3;font-weight:700;font-size:.72rem">${b.id}</td>
+      <td style="font-size:.78rem;font-weight:600">${b.name}</td>
+      <td><span class="badge bg-dark">${b.branch}</span></td>
+      <td style="font-size:.75rem">${b.type}</td>
+      <td style="white-space:nowrap;font-size:.72rem">${b.date}</td>
+      <td class="text-center fw-bold">${b.items}</td>
+      <td class="text-center" style="font-size:.78rem">${fmt(b.weight)}</td>
+      <td><span class="badge ${sm[b.status]||'bg-secondary'}">${b.status}</span></td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="bgDelete(${b.id})" style="font-size:.68rem"><i class="bi bi-trash3"></i></button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  const totalItems=bgFiltered.reduce((s,b)=>s+b.items,0);
+  $('#bg-stat-count').text(bgFiltered.length+' bags');
+  $('#bg-stat-items').text(totalItems+' items total');
+}
+function bgApply(){
+  const s=$('#bg-search').val().toLowerCase();
+  const br=$('#bg-branch').val();
+  const tp=$('#bg-type').val();
+  bgFiltered=BAG_DATA.filter(b=>{
+    if(br&&b.branch!==br) return false;
+    if(tp&&b.type!==tp) return false;
+    if(s&&!b.name.toLowerCase().includes(s)) return false;
+    return true;
+  }); bgRender();
+}
+function bgReset(){$('#bg-search').val('');$('#bg-branch').val('');$('#bg-type').val('');bgFiltered=[...BAG_DATA];bgRender();}
+function bgDelete(id){if(!confirm('Delete bag?'))return;BAG_DATA=BAG_DATA.filter(x=>x.id!==id);bgFiltered=bgFiltered.filter(x=>x.id!==id);bgRender();showToast('Deleted','bg-danger');}
+function showBagModal(){
+  document.getElementById('bg-input-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('bg-input-note').value='';
+  new bootstrap.Modal('#bagModal').show();
+}
+function saveBag(){
+  const branch=document.getElementById('bg-input-branch').value;
+  const type=document.getElementById('bg-input-type').value;
+  const date=document.getElementById('bg-input-date').value;
+  const note=document.getElementById('bg-input-note').value;
+  const newId=Date.now();
+  const name=`${date}-${BAG_DATA.length+1}-${type.replace(/\s/g,'')}${branch}`;
+  const bag={id:newId,name,branch,type,date,items:0,weight:0,status:'open',note};
+  BAG_DATA.unshift(bag); bgFiltered.unshift(bag);
+  bgRender(); bootstrap.Modal.getInstance(document.getElementById('bagModal'))?.hide();
+  showToast('Bag created: '+name,'bg-success');
+}
+
+// ══════════════════════════════════
+// TRACKING (PUBLIC)
+// ══════════════════════════════════
+function doTrack(){
+  const q=$('#tk-input').val().trim().toLowerCase();
+  const result=document.getElementById('tk-result');
+  if(!q){result.innerHTML='';return;}
+  const found=[];
+  RAW_DATA.forEach(c=>{
+    c.products.forEach(p=>{
+      if(c.sm_code.toLowerCase().includes(q)||p.product_tracking.toLowerCase().includes(q)){
+        found.push({container:c,product:p});
+      }
+    });
+  });
+  if(!found.length){
+    result.innerHTML=`<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> ไม่พบข้อมูล: <strong>${q}</strong></div>`;
+    return;
+  }
+  const c=found[0].container;
+  const p=found[0].product;
+  const printed=c.printed==='true'||c.printed===true;
+  const steps=[
+    {label:'รับสินค้าที่โกดังจีน — 到中国仓库',icon:'bi-box-seam',done:true,current:false},
+    {label:`กำลังขนส่ง (${c.transport_name}) — 运输中`,icon:'bi-truck-front',done:true,current:false},
+    {label:'ถึงไทย / สแกนเข้าโกดัง — 到泰国仓',icon:'bi-box-arrow-in-down',done:printed,current:!printed},
+    {label:'แจ้งลูกค้ารับสินค้า — 通知客户',icon:'bi-bell',done:false,current:false},
+    {label:'ส่งสำเร็จ — 已送达',icon:'bi-check-circle',done:false,current:false},
+  ];
+  let html=`<div class="track-result">
+    <div class="track-header">
+      <h6 class="mb-1 fw-bold"><i class="bi bi-geo-alt-fill"></i> ${c.sm_code}</h6>
+      <div class="d-flex flex-wrap gap-3 small opacity-90">
+        <span><i class="bi bi-building"></i> ${c.branch_name}</span>
+        <span>${transBadge(c.transport_name)}</span>
+        <span><i class="bi bi-calendar3"></i> ${c.sm_date}</span>
+      </div>
+    </div>
+    <div class="px-3 py-2 bg-light border-bottom">
+      <span class="small fw-bold text-dark">📦 ${p.product_name}</span>
+      <span class="small text-muted ms-2" style="font-family:'JetBrains Mono',monospace">Trk: ${p.product_tracking}</span>
+      <span class="badge badge-ek ms-2">Qty: ${p.product_qty}</span>
+    </div>`;
+  steps.forEach(s=>{
+    html+=`<div class="track-step">
+      <div class="step-dot ${s.done?'done':s.current?'current':''}"></div>
+      <div>
+        <i class="bi ${s.icon} ${s.done?'text-success':s.current?'text-warning':'text-muted'} me-1"></i>
+        <span class="${s.done?'fw-bold text-dark':s.current?'fw-bold text-warning':'text-muted'} small">${s.label}</span>
+        ${s.done?'<i class="bi bi-check-circle-fill text-success ms-2"></i>':''}
+        ${s.current?'<span class="badge bg-warning text-dark ms-2" style="font-size:.62rem">Current</span>':''}
+      </div>
+    </div>`;
+  });
+  if(found.length>1) html+=`<div class="px-3 py-2 bg-light text-muted small border-top">พบ ${found.length} รายการ — แสดงรายการแรก</div>`;
+  html+='</div>';
+  result.innerHTML=html;
+}
+$('#tk-input').on('keydown',e=>{if(e.key==='Enter')doTrack();});
+
+// ══════════════════════════════════
+// LIGHTBOX
+// ══════════════════════════════════
+function openLightbox(src) {
+  document.getElementById('lb-img').src=src;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+// ══════════════════════════════════
+// HELPERS
+// ══════════════════════════════════
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(n){return parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function showToast(msg,cls='bg-success'){
+  const t=document.getElementById('mainToast');
+  t.className=`toast align-items-center text-white border-0 ${cls}`;
+  document.getElementById('toast-msg').textContent=msg;
+  new bootstrap.Toast(t,{delay:2800}).show();
+}
+function printDetailModal(){window.print();}
+
+// ══════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.key==='f'){e.preventDefault();document.getElementById('as-search')?.focus();}
+  if(e.ctrlKey&&e.key==='n'){e.preventDefault();showCreateModal();}
+});
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+$(document).ready(function(){
+  renderHome();
+  asPageSize=parseInt($('#as-limit').val())||50;
+  asFiltered=[...RAW_DATA]; asRender();
+  document.getElementById('cr-date').value=new Date().toISOString().slice(0,10);
+  $('#as-limit').on('change',function(){asApply();});
+  $('#as-search').on('keydown',e=>{if(e.key==='Enter')asApply();});
+  $('#rc-search').on('keydown',e=>{if(e.key==='Enter')rcApply();});
+  $('#ar-search').on('keydown',e=>{if(e.key==='Enter')arApply();});
+  $('#nt-search').on('keydown',e=>{if(e.key==='Enter')ntApply();});
+  $('#bg-search').on('keydown',e=>{if(e.key==='Enter')bgApply();});
+  $('#tr-search').on('keydown',e=>{if(e.key==='Enter')trApply();});
+});
+</script>
+</body>
+</html>
